@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # Name: Mercylyn Wiemer
 # Student number: 10749306
+# Date: 13-04-2018
+#
+# Data processing: scraping IMDB
+# This program scrapes/acquires data using BeautifulSoup (python web mining module).
+# The source of the data: IMDB TV series (see TARGET_URL): top 50 TV Series.
+# The data includes: TV title, rating, genres, actors, and runtime.
+#
 """
 This script scrapes IMDB and outputs a CSV file with highest rated tv series.
 """
@@ -29,6 +36,7 @@ def extract_tvseries(dom):
     tvseries = []
     tv_shows = dom.find_all("div", {"class": "lister-item-content"})
 
+    # acquire data of IMDB page and store in list
     for tv_show in tv_shows:
         show = []
         title = tv_show.find("a").string
@@ -43,11 +51,6 @@ def extract_tvseries(dom):
         show.append(runtime)
         tvseries.append(show)
 
-    # ADD YOUR CODE HERE TO EXTRACT THE ABOVE INFORMATION ABOUT THE
-    # HIGHEST RATED TV-SERIES
-    # NOTE: FOR THIS EXERCISE YOU ARE ALLOWED (BUT NOT REQUIRED) TO IGNORE
-    # UNICODE CHARACTERS AND SIMPLY LEAVE THEM OUT OF THE OUTPUT.
-
     return tvseries
 
 
@@ -58,9 +61,10 @@ def save_csv(outfile, tvseries):
     writer = csv.writer(outfile)
     writer.writerow(['Title', 'Rating', 'Genre', 'Actors', 'Runtime'])
 
-    # ADD SOME CODE OF YOURSELF HERE TO WRITE THE TV-SERIES TO DISK
+    # write tv-series to csv file
     for show in tvseries:
         writer.writerow(show)
+
 
 def simple_get(url):
     """
