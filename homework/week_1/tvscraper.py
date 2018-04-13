@@ -4,12 +4,11 @@
 # Date: 13-04-2018
 #
 # Data processing: scraping IMDB
-# This program scrapes/acquires data using BeautifulSoup (python web mining module).
-# The source of the data: IMDB TV series (see TARGET_URL): top 50 TV Series.
-# The data includes: TV title, rating, genres, actors, and runtime.
-#
+
 """
 This script scrapes IMDB and outputs a CSV file with highest rated tv series.
+The source of the data: IMDB TV series (see TARGET_URL): top 50 TV Series.
+The data includes: TV title, rating, genres, actors, and runtime.
 """
 
 import csv
