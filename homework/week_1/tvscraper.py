@@ -33,25 +33,20 @@ def extract_tvseries(dom):
     - Actors/actresses (comma separated if more than one)
     - Runtime (only a number!)
     """
-    tvseries = []
-    tv_shows = dom.find_all("div", {"class": "lister-item-content"})
+    tvseries_list = []
+    tvseries_html = dom.find_all("div", {"class": "lister-item-content"})
 
     # acquire data of IMDB page and store in list
-    for tv_show in tv_shows:
-        show = []
-        title = tv_show.find("a").string
-        rating = tv_show.find("div", {"class": "inline-block ratings-imdb-rating"}).strong.string
-        genres = tv_show.find("span", {"class": "genre"}).string.strip()
-        actors = tv_show.select("p")[2].text.strip("Stars: \n").replace("\n", "")
-        runtime = tv_show.find("span", {"class": "runtime"}).string.strip(" min")
-        show.append(title)
-        show.append(rating)
-        show.append(genres)
-        show.append(actors)
-        show.append(runtime)
-        tvseries.append(show)
+    for tvseries in tvseries_html:
+        title = tvseries.find("a").string
+        rating = tvseries.find("div", {"class": "inline-block ratings-imdb-rating"}).strong.string
+        genres = tvseries.find("span", {"class": "genre"}).string.strip()
+        actors = tvseries.select("p")[2].text.strip("Stars: \n").replace("\n", "")
+        runtime = tvseries.find("span", {"class": "runtime"}).string.strip(" min")
 
-    return tvseries
+        tvseries_list.append([title, rating, genres, actors, runtime])
+
+    return tvseries_list
 
 
 def save_csv(outfile, tvseries):
