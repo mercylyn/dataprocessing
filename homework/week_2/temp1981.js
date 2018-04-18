@@ -10,33 +10,34 @@
 var dom = document.getElementById("rawdata").value;
 
 var knmi = dom.split("\n", 365);
-var date_list = []
-var temp_list = []
+var dateList = []
+var tempList = []
 
 for (var i = 0; i < knmi.length; i++)
 {
     var data = knmi[i].split(",");
     var date_iso_format = data[0].replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
     var date = new Date(date_iso_format);
-    date_list.push(date);
-    temp_list.push(+data[1]);
+    dateList.push(date);
+    tempList.push(+data[1]);
 }
-
-console.log(temp_list)
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 
+var dateTransform = createTransform([dateList[0], dateList[364]], [0, 600]);
+var tempTransform = createTransform([Math.min(...tempList), Math.max(...tempList)], [0, 300]);
+
 var x = 0;
 ctx.beginPath();
 
-for(temp in temp_list)
+for(var i = 0; i < dateList.length; i++)
 {
-    console.log(temp_list[temp], x);
-    ctx.moveTo(0,0);
-    ctx.lineTo(x += 1, temp_list[temp]);
-    ctx.lineWidth = 5;
-    ctx.lineCap = 'round';
+    console.log(dateTransform(dateList[i]));
+    ctx.moveTo(dateTransform(dateList[i]),tempTransform(tempList[i]));
+    ctx.lineTo(dateTransform(dateList[i + 1]), tempTransform(tempList[i + 1]));
+    // ctx.lineWidth = 5;
+    // ctx.lineCap = 'round';
 }
 
 ctx.stroke();
@@ -65,5 +66,3 @@ function createTransform(domain, range)
       return alpha * x + beta;
     }
 }
-
-createTransform
