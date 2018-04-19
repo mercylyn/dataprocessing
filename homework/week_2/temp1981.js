@@ -9,10 +9,10 @@
 var dom = document.getElementById("rawdata").value;
 
 var knmi = dom.split("\n", 365);
-var dateArray = []
-var tempArray = []
+var dateArray = [];
+var tempArray = [];
 
-for (var i = 0; i < knmi.length; i++)
+for(var i = 0; i < knmi.length; i++)
 {
     var data = knmi[i].split(",");
     var dateIsoFormat = data[0].replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
@@ -21,19 +21,66 @@ for (var i = 0; i < knmi.length; i++)
 }
 
 var canvas = document.getElementById("canvas");
+//if (canvas.getContext)
 var ctx = canvas.getContext('2d');
 
-var dateTransform = createTransform([dateArray[0], dateArray[364]], [50, 600]);
-var tempTransform = createTransform([Math.min(...tempArray), Math.max(...tempArray)], [50, 250]);
+var dateTransform = createTransform([dateArray[0], dateArray[364]], [50, 595]);
+var tempTransform = createTransform([Math.max(...tempArray), Math.min(...tempArray)], [50, 325]);
 
-var scale = 300;
-ctx.beginPath();
+
+var transformedDate = []
+var transformedTemp = []
 
 for(var i = 0; i < dateArray.length; i++)
 {
-    ctx.moveTo(dateTransform(dateArray[i]),scale - tempTransform(tempArray[i]));
-    ctx.lineTo(dateTransform(dateArray[i + 1]), scale - tempTransform(tempArray[i + 1]));
+    transformedDate.push(dateTransform(dateArray[i]));
+    transformedTemp.push(tempTransform(tempArray[i]));
 }
+
+console.log(transformedDate);
+
+ctx.beginPath();
+for(var i = 0; i < dateArray.length; i++)
+{
+    ctx.moveTo(transformedDate[i], transformedTemp[i]);
+    ctx.lineTo(transformedDate[i + 1], transformedTemp[i + 1]);
+}
+ctx.stroke();
+
+var transMaxTemp = Math.min(...transformedTemp);
+var transMinTemp = Math.max(...transformedTemp);
+var MaxTemp = Math.max(...tempArray);
+var MinTemp = Math.min(...tempArray);
+
+console.log(tempTransform(300));
+
+// x-axis
+ctx.beginPath();
+ctx.moveTo(50, tempTransform(-150));
+ctx.lineTo(595, tempTransform(-150));
+
+// y-axis
+ctx.moveTo(40, tempTransform(250));
+ctx.lineTo(40, tempTransform(-150));
+
+var yAxis = [-150, -100, -50, 0, 50, 100, 150, 200, 250];
+var xAxis = [31, 28, 31, 30, 28, 31, 30, 31, 30, 31, 30, 31];
+
+for (var i = 0; i < yAxis.length; i++)
+{
+    // values of y-axis
+    ctx.moveTo(40, tempTransform(yAxis[i]));
+    ctx.lineTo(30, tempTransform(yAxis[i]));
+}
+
+for (var i = 0; i < xAxis.length; i++)
+{
+    // values of y-axis
+    ctx.moveTo(dateTransform(xAxis[i]), tempTransform(-150));
+    ctx.lineTo(dateTransform(xAxis[i]), tempTransform(-150));
+}
+
+console.log(dateTransform(31));
 
 ctx.stroke();
 
