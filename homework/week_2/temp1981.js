@@ -3,41 +3,36 @@
  * Course: Data Processing
  * Date: 20-04-2018
  *
- * This program
- *
+ * Maximum temperature in De Bilt (NL) 1981
  *
  */
 var dom = document.getElementById("rawdata").value;
 
 var knmi = dom.split("\n", 365);
-var dateList = []
-var tempList = []
+var dateArray = []
+var tempArray = []
 
 for (var i = 0; i < knmi.length; i++)
 {
     var data = knmi[i].split(",");
-    var date_iso_format = data[0].replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-    var date = new Date(date_iso_format);
-    dateList.push(date);
-    tempList.push(+data[1]);
+    var dateIsoFormat = data[0].replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+    dateArray.push(new Date(dateIsoFormat));
+    tempArray.push(+data[1]);
 }
 
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 
-var dateTransform = createTransform([dateList[0], dateList[364]], [0, 600]);
-var tempTransform = createTransform([Math.min(...tempList), Math.max(...tempList)], [0, 300]);
+var dateTransform = createTransform([dateArray[0], dateArray[364]], [50, 600]);
+var tempTransform = createTransform([Math.min(...tempArray), Math.max(...tempArray)], [50, 250]);
 
-var x = 0;
+var scale = 300;
 ctx.beginPath();
 
-for(var i = 0; i < dateList.length; i++)
+for(var i = 0; i < dateArray.length; i++)
 {
-    console.log(dateTransform(dateList[i]));
-    ctx.moveTo(dateTransform(dateList[i]),tempTransform(tempList[i]));
-    ctx.lineTo(dateTransform(dateList[i + 1]), tempTransform(tempList[i + 1]));
-    // ctx.lineWidth = 5;
-    // ctx.lineCap = 'round';
+    ctx.moveTo(dateTransform(dateArray[i]),scale - tempTransform(tempArray[i]));
+    ctx.lineTo(dateTransform(dateArray[i + 1]), scale - tempTransform(tempArray[i + 1]));
 }
 
 ctx.stroke();
