@@ -37,7 +37,7 @@ for(var i = 0; i < dateArray.length; i++)
     transformedTemp.push(tempTransform(tempArray[i]));
 }
 
-console.log(transformedDate);
+console.log(transformedDate[31]);
 
 ctx.beginPath();
 for(var i = 0; i < dateArray.length; i++)
@@ -47,24 +47,22 @@ for(var i = 0; i < dateArray.length; i++)
 }
 ctx.stroke();
 
-var transMaxTemp = Math.min(...transformedTemp);
-var transMinTemp = Math.max(...transformedTemp);
-var MaxTemp = Math.max(...tempArray);
-var MinTemp = Math.min(...tempArray);
-
-console.log(tempTransform(300));
+// var transMaxTemp = Math.min(...transformedTemp);
+// var transMinTemp = Math.max(...transformedTemp);
+// var MaxTemp = Math.max(...tempArray);
+// var MinTemp = Math.min(...tempArray);
 
 // x-axis
 ctx.beginPath();
-ctx.moveTo(50, tempTransform(-150));
-ctx.lineTo(595, tempTransform(-150));
+ctx.moveTo(transformedDate[0], tempTransform(-150));
+ctx.lineTo(transformedDate[364], tempTransform(-150));
 
 // y-axis
 ctx.moveTo(40, tempTransform(250));
 ctx.lineTo(40, tempTransform(-150));
 
 var yAxis = [-150, -100, -50, 0, 50, 100, 150, 200, 250];
-var xAxis = [31, 28, 31, 30, 28, 31, 30, 31, 30, 31, 30, 31];
+var xAxis = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 30];
 
 for (var i = 0; i < yAxis.length; i++)
 {
@@ -73,16 +71,20 @@ for (var i = 0; i < yAxis.length; i++)
     ctx.lineTo(30, tempTransform(yAxis[i]));
 }
 
+
+var month = 0;
+
 for (var i = 0; i < xAxis.length; i++)
 {
     // values of y-axis
-    ctx.moveTo(dateTransform(xAxis[i]), tempTransform(-150));
-    ctx.lineTo(dateTransform(xAxis[i]), tempTransform(-150));
+    ctx.moveTo(transformedDate[month += xAxis[i]], tempTransform(-150));
+    ctx.lineTo(transformedDate[month], tempTransform(-160));
 }
 
-console.log(dateTransform(31));
-
 ctx.stroke();
+
+ctx.font = "20px Arial";
+ctx.fillText("Maximum Temperature in De Bilt (NL) 1981", 140, 30);
 
 function createTransform(domain, range)
 {
