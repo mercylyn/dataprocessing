@@ -28,75 +28,80 @@ function reqListener ()
         tempArray.push(+data[1]);
     }
 
-    // draw the plot
+    // Make canvas to draw line graph on.
     let canvas = document.getElementById("canvas");
 
+    // Check if canvas is supported by browser.
     if (canvas.getContext)
     {
+        // Create functions to transform dates and temperatures.
+        let dateTransform = createTransform([dateArray[0], dateArray[364]],
+                                            [100, 595]);
+        let tempTransform = createTransform([Math.max(...tempArray),
+                                             Math.min(...tempArray)], [50, 300]);
         let ctx = canvas.getContext('2d');
         let width = 600;
-        let height = 400;
+        let transformedDate = [];
+        let transformedTemp = [];
+        let xAxisBorder = tempTransform(-150);
+        let yAxisBorder = 90;
+        let month_days = 0;
 
-        /* create functions to transform dates and temperatures. */
-        let dateTransform = createTransform([dateArray[0], dateArray[364]], [100, 595]);
-        let tempTransform = createTransform([Math.max(...tempArray), Math.min(...tempArray)], [50, 300]);
+        // Temperature values.
+        let yAxis = [-150, -100, -50, 0, 50, 100, 150, 200, 250];
 
-        let transformedDate = []
-        let transformedTemp = []
+        // Number of days per month: starting value is zero to indicate begin x-axis.
+        let xAxis = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 30];
 
-        /* transform the data: dates and temperatures. */
+        let month_name = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                          "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        // Transform the data: dates and temperatures.
         for(let i = 0; i < dateArray.length; i++)
         {
             transformedDate.push(dateTransform(dateArray[i]));
             transformedTemp.push(tempTransform(tempArray[i]));
         }
 
-        /* Draw line: temperature per day. */
         ctx.beginPath();
         ctx.strokeStyle = "red";
 
+        // Plot data: temperature per day (1 year).
         for(let i = 0; i < transformedDate.length; i++)
         {
             ctx.moveTo(transformedDate[i], transformedTemp[i]);
             ctx.lineTo(transformedDate[i + 1], transformedTemp[i + 1]);
         }
+
         ctx.stroke();
 
-        // let transMaxTemp = Math.min(...transformedTemp);
-        // var transMinTemp = Math.max(...transformedTemp);
-        // var MaxTemp = Math.max(...tempArray);
-        // var MinTemp = Math.min(...tempArray);
-
-        /* Draw the x-axis. */
+        // Draw the x-axis.
         ctx.beginPath();
         ctx.strokeStyle = "black";
-        ctx.moveTo(transformedDate[0], tempTransform(-150));
-        ctx.lineTo(transformedDate[364], tempTransform(-150));
+
+        // Use first and last date of the year.
+        ctx.moveTo(transformedDate[0], xAxisBorder);
+        ctx.lineTo(transformedDate[364], xAxisBorder);
+
+        // Draw the y-axis.
+        ctx.moveTo(yAxisBorder, tempTransform(250));
+        ctx.lineTo(yAxisBorder, xAxisBorder);
         ctx.stroke();
 
-        /* Draw the y-axis. */
-        ctx.moveTo(90, tempTransform(250));
-        ctx.lineTo(90, tempTransform(-150));
+        ctx.beginPath();
 
-        let yAxis = [-150, -100, -50, 0, 50, 100, 150, 200, 250];
-        let xAxis = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 30];
-
-        /* Draw the values of y-axis (temperature). */
+        // Draw the values of y-axis (temperature).
         for (let i = 0; i < yAxis.length; i++)
         {
             // dashes of y-axis
-            ctx.moveTo(90, tempTransform(yAxis[i]));
-            ctx.lineTo(80, tempTransform(yAxis[i]));
+            ctx.moveTo(yAxisBorder, tempTransform(yAxis[i]));
+            ctx.lineTo(yAxisBorder - 10, tempTransform(yAxis[i]));
 
             ctx.font = "12px Arial";
             ctx.fillText(String(yAxis[i]), 50, tempTransform(yAxis[i]) + 5);
-
         }
 
-        let month_days = 0;
-        let month_name = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-        /* Draw the values of the x-axis (month name). */
+        // Draw the values of the x-axis (month name).
         for (let i = 0; i < xAxis.length; i++)
         {
             ctx.moveTo(transformedDate[month_days += xAxis[i]], tempTransform(-150));
@@ -108,37 +113,34 @@ function reqListener ()
 
         ctx.stroke();
 
-        // indication of zero line
-        ctx.setLineDash([5,3]);
+        // Indicate zero line.
         ctx.beginPath();
+        ctx.setLineDash([5,3]);
         ctx.moveTo(transformedDate[0], tempTransform(0));
         ctx.lineTo(transformedDate[364], tempTransform(0));
         ctx.stroke();
 
-        // Title
+        // Title of line graph.
+        ctx.beginPath();
         ctx.font = "20px Arial";
         ctx.fillText("Maximum Temperature in De Bilt (NL) 1981", 140, 30);
         ctx.stroke();
 
-        // x-label
+        // Set x-label.
         ctx.beginPath();
         ctx.fillText("Month", width / 2, 380);
+
+        // Set y-label.
         ctx.translate(0, 300);
-        // ctx.rotate(90 * (Math.PI / 180));
         ctx.rotate(-Math.PI / 2)
         ctx.fillText("Mean temperature (°C x 0.1)", 20, 30);
-
     }
 
+    /* Returns a function that, for a given domain and range, calculates at
+     * which coordinate the next data point will be plotted.
+     */
     function createTransform(domain, range)
     {
-    	// domain is a two-element array of the data bounds [domain_min, domain_max]
-    	// range is a two-element array of the screen bounds [range_min, range_max]
-    	// this gives you two equations to solve:
-    	// range_min = alpha * domain_min + beta
-    	// range_max = alpha * domain_max + beta
-     		// a solution would be:
-
         let domain_min = domain[0]
         let domain_max = domain[1]
         let range_min = range[0]
