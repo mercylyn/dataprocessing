@@ -7,10 +7,11 @@
  * This program creates a line graph of the temperature at De Bilt weather
  * station. The graph is included in a web page on github.
  *
- * Source of data: http://projects.knmi.nl/klimatologie/daggegevens/selectie.cgi
+ * Source of the data: http://projects.knmi.nl/klimatologie/daggegevens/selectie.cgi
  *
  */
 
+/* Event listener is requested: data to web page. */
 function reqListener ()
 {
     dom = this.responseText;
@@ -158,7 +159,8 @@ function reqListener ()
     }
 }
 
-let xhttp = new XMLHttpRequest();
-xhttp.addEventListener("load", reqListener);
-xhttp.open("GET", "https://raw.githubusercontent.com/mercylyn/dataprocessing/master/homework/week_2/data_1981.csv");
-xhttp.send();
+// Send HTTP request.
+let oReq = new XMLHttpRequest();
+oReq.addEventListener("load", reqListener);
+oReq.open("GET", "https://raw.githubusercontent.com/mercylyn/dataprocessing/master/homework/week_2/data_1981.csv");
+oReq.send();
