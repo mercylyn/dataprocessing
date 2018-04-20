@@ -126,7 +126,7 @@ function reqListener ()
         ctx.translate(0, 300);
         // ctx.rotate(90 * (Math.PI / 180));
         ctx.rotate(-Math.PI / 2)
-        ctx.fillText("Mean temperature (°C)", 20, 30);
+        ctx.fillText("Mean temperature (°C x 0.1)", 20, 30);
 
     }
 
