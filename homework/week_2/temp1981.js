@@ -69,16 +69,23 @@ for (var i = 0; i < yAxis.length; i++)
     // values of y-axis
     ctx.moveTo(40, tempTransform(yAxis[i]));
     ctx.lineTo(30, tempTransform(yAxis[i]));
+
+    ctx.font = "12px Arial";
+    ctx.fillText(String(yAxis[i]), 5, tempTransform(yAxis[i]) + 5);
+
 }
 
 
 var month = 0;
+var month_name = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 for (var i = 0; i < xAxis.length; i++)
 {
-    // values of y-axis
     ctx.moveTo(transformedDate[month += xAxis[i]], tempTransform(-150));
     ctx.lineTo(transformedDate[month], tempTransform(-160));
+
+    ctx.font = "12px Arial";
+    ctx.fillText(String(month_name[i]), transformedDate[month] + 10, tempTransform(-170));
 }
 
 ctx.stroke();
