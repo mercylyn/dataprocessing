@@ -11,10 +11,6 @@ function reqListener ()
 {
     dom = this.responseText;
 
-
-
-    // var dom = document.getElementById("rawdata").value;
-
     var knmi = dom.split("\n", 365);
     var dateArray = [];
     var tempArray = [];
@@ -124,7 +120,6 @@ function reqListener ()
           return alpha * x + beta;
         }
     }
-
 }
 
 var oReq = new XMLHttpRequest();
