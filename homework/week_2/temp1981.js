@@ -28,15 +28,18 @@ function reqListener ()
         tempArray.push(+data[1]);
     }
 
+    // draw the plot
     let canvas = document.getElementById("canvas");
+
     if (canvas.getContext)
     {
         let ctx = canvas.getContext('2d');
+        let width = 600;
+        let height = 400;
 
         /* create functions to transform dates and temperatures. */
-        let dateTransform = createTransform([dateArray[0], dateArray[364]], [50, 595]);
-        let tempTransform = createTransform([Math.max(...tempArray), Math.min(...tempArray)], [50, 325]);
-
+        let dateTransform = createTransform([dateArray[0], dateArray[364]], [100, 595]);
+        let tempTransform = createTransform([Math.max(...tempArray), Math.min(...tempArray)], [50, 300]);
 
         let transformedDate = []
         let transformedTemp = []
@@ -48,8 +51,10 @@ function reqListener ()
             transformedTemp.push(tempTransform(tempArray[i]));
         }
 
-        /* Draw graph: temperature per day. */
+        /* Draw line: temperature per day. */
         ctx.beginPath();
+        ctx.strokeStyle = "red";
+
         for(let i = 0; i < transformedDate.length; i++)
         {
             ctx.moveTo(transformedDate[i], transformedTemp[i]);
@@ -64,12 +69,14 @@ function reqListener ()
 
         /* Draw the x-axis. */
         ctx.beginPath();
+        ctx.strokeStyle = "black";
         ctx.moveTo(transformedDate[0], tempTransform(-150));
         ctx.lineTo(transformedDate[364], tempTransform(-150));
+        ctx.stroke();
 
         /* Draw the y-axis. */
-        ctx.moveTo(40, tempTransform(250));
-        ctx.lineTo(40, tempTransform(-150));
+        ctx.moveTo(90, tempTransform(250));
+        ctx.lineTo(90, tempTransform(-150));
 
         let yAxis = [-150, -100, -50, 0, 50, 100, 150, 200, 250];
         let xAxis = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 30];
@@ -77,15 +84,14 @@ function reqListener ()
         /* Draw the values of y-axis (temperature). */
         for (let i = 0; i < yAxis.length; i++)
         {
-            // values of y-axis
-            ctx.moveTo(40, tempTransform(yAxis[i]));
-            ctx.lineTo(30, tempTransform(yAxis[i]));
+            // dashes of y-axis
+            ctx.moveTo(90, tempTransform(yAxis[i]));
+            ctx.lineTo(80, tempTransform(yAxis[i]));
 
             ctx.font = "12px Arial";
-            ctx.fillText(String(yAxis[i]), 5, tempTransform(yAxis[i]) + 5);
+            ctx.fillText(String(yAxis[i]), 50, tempTransform(yAxis[i]) + 5);
 
         }
-
 
         let month_days = 0;
         let month_name = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -102,9 +108,26 @@ function reqListener ()
 
         ctx.stroke();
 
-        /* Title. */
+        // indication of zero line
+        ctx.setLineDash([5,3]);
+        ctx.beginPath();
+        ctx.moveTo(transformedDate[0], tempTransform(0));
+        ctx.lineTo(transformedDate[364], tempTransform(0));
+        ctx.stroke();
+
+        // Title
         ctx.font = "20px Arial";
         ctx.fillText("Maximum Temperature in De Bilt (NL) 1981", 140, 30);
+        ctx.stroke();
+
+        // x-label
+        ctx.beginPath();
+        ctx.fillText("Month", width / 2, 380);
+        ctx.translate(0, 300);
+        // ctx.rotate(90 * (Math.PI / 180));
+        ctx.rotate(-Math.PI / 2)
+        ctx.fillText("Mean temperature (°C)", 20, 30);
+
     }
 
     function createTransform(domain, range)
@@ -133,7 +156,7 @@ function reqListener ()
     }
 }
 
-let oReq = new XMLHttpRequest();
-oReq.addEventListener("load", reqListener);
-oReq.open("GET", "https://raw.githubusercontent.com/mercylyn/dataprocessing/master/homework/week_2/data_1981.csv");
-oReq.send();
+let xhttp = new XMLHttpRequest();
+xhttp.addEventListener("load", reqListener);
+xhttp.open("GET", "https://raw.githubusercontent.com/mercylyn/dataprocessing/master/homework/week_2/data_1981.csv");
+xhttp.send();
