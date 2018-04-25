@@ -1,5 +1,4 @@
 # Name: Mercylyn Wiemer
-# source: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?dl=8BED
 
 import csv
 import json
