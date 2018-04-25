@@ -8,8 +8,8 @@ with open('waste_amsterdam.csv', 'r') as csvfile, open('waste_amsterdam.json', '
     reader = csv.reader(csvfile)
     writer = csv.writer(jsonfile)
     waste_dict = {rows[0]:rows[1] for rows in reader}
-    data_dict = {"data" : waste_dict}
-    json.dump(data_dict, jsonfile)
+    dataset = {"data" : waste_dict}
+    json.dump(dataset, jsonfile)
 
 # csvfile = open('waste_amsterdam.csv', 'r')
 # jsonfile = open('waste_amsterdam.json', 'w')
