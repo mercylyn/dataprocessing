@@ -32,19 +32,14 @@
         .append("p")
         .text("Source: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?ts=1524649884497");
 
-    var width = 600, height = 500;
-    var barPadding = 15;
+    var width = 600, height = 300;
+    var barPadding = 10;
 
-    var x = d3.scale.ordinal()
-        .rangeRoundBands([0, width], .1);
-
-    var y = d3.scale.linear()
-        .range([height, 0]);
-
+    // create SVG element
     var svg = d3.select("body")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+                    .append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
 
     // var rect = svg.append("rect")
     //                 .attr("x", 10)
@@ -72,43 +67,74 @@
             return console.log("Error");
         }
 
-        var dataset = data.data
+        var dataset = data.data;
+        var padding = 100;
+        var max = d3.max(dataset, function(d) {    //Returns 480
+            return d.quantity;  //References first value in each sub-array
+        });
+        var min = d3.min(dataset, function(d) {    //Returns 480
+            return d.quantity;  //References first value in each sub-array
+        });
+
+        // create scale functions
+        var xScale = d3.scale.ordinal()
+            .domain([0, max])
+            .range([0, width]);
+
+        var yScale = d3.scale.linear()
+            .domain([min, max])
+            .range([padding, height - barPadding]);
+
+        // define x axis
+        var xAxis = d3.svg.axis()
+                        .scale(xScale)
+                        .orient("bottom")
+                        .ticks(5);
+
+        // define y axis
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left")
+            .ticks(5);
+
+        // create rectangles
         svg.selectAll("rect")
            .data(dataset)
            .enter()
            .append("rect")
            .attr("x", function(d, i) {
-               return i * (width / dataset.length - barPadding);  //Bar width of 20 plus 1 for padding
+               return i * (width / dataset.length);  //Bar width of 20 plus 1 for padding
             })
             .attr("y", function(d) {
-                return height - d.quantity;  //Height minus data value
+                return height - yScale(d.quantity);  //Height minus data value
             })
-           .attr("width", 20)
+           .attr("width", width / dataset.length - barPadding)
            .attr("height", function(d) {
-               return d.quantity;
+               return yScale(d.quantity);
             })
             .attr("fill", "teal");
 
-            svg.selectAll("text")
-               .data(dataset)
-               .enter()
-               .append("text")
-               .text(function(d) {
-                    return d;
-               })
-               .attr("x", function(d, i) {
-                    return i * (w / dataset.length);
-               })
-               .attr("y", function(d) {
-                    return h - (d * 4);
-               })
+        // create labels
+        svg.selectAll("text")
+           .data(dataset)
+           .enter()
+           .append("text")
+           .text(function(d) {
+               return d.quantity;
+           })
+           .attr("x", function(d, i) {
+                return i * (width / dataset.length);
+           })
+           .attr("y", function(d) {
+                return height - (yScale(d.quantity));
+           })
+           .attr("font-family", "sans-serif")
+           .attr("font-size", "11px")
+           .attr("fill", "black");
 
-        d3.select("body")
-            .selectAll("p")
-            .data(data.data)
-            .enter()
-            .append("p")
-            .text(function(d) {
-                return d.year + " " + d.quantity;
-            });
+           // create x axis
+           svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
      });
