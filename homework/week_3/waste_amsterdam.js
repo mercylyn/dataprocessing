@@ -11,6 +11,7 @@
  * http://bl.ocks.org/Caged/6476579
  * http://jsbin.com/nuyipikaye/edit?html,js,output
  * http://www.knowstack.com/different-ways-of-loading-a-d3js-data/
+ * http://bl.ocks.org/Caged/6476579
  */
 
     d3.select("head")
@@ -34,7 +35,7 @@
         .append("p")
         .text("Source: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?ts=1524649884497");
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    var margin = {top: 100, bottom: 50, right: 20, left: 100},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom,
         barPadding = 10,
@@ -56,32 +57,27 @@
         // create scale functions
         var xScale = d3.scale.ordinal()
             .rangeRoundBands([0, width], .1);
-            // // .range([padding, width - padding * 2]);
-            // .domain([0, max])
-            // .range([0, width - 100]);
 
         var yScale = d3.scale.linear()
-            // .domain([min - 100, max])
             .range([height, 0]);
 
         // define X axis
         var xAxis = d3.svg.axis()
             .scale(xScale)
             .orient("bottom")
-            // .ticks(5);
 
         // define Y axis
         var yAxis = d3.svg.axis()
             .scale(yScale)
             .orient("left")
-            .ticks(11);
 
         var tip = d3.tip()
           .attr('class', 'd3-tip')
           .offset([-10, 0])
           .html(function(d) {
-            return "<strong>Quantity:</strong> <span style='color:red'>" + d.quantity + "</span>";
-          })
+            return "<strong>Quantity:</strong> <span style='color:orange'>"
+                    + d.quantity + "</span>";
+          });
 
         // create SVG element
         var svg = d3.select("body")
@@ -116,21 +112,22 @@
             .attr("class", "x axis")
             .attr("transform", "translate(0," + (height) + ")")
             .call(xAxis)
-            .append("text")
-            .attr("class", "x label")
-            .attr("text-anchor", "end")
-            .attr("x", width - 100)
-            .attr("y", height - 100)
-            .text("income per capita, inflation-adjusted (dollars)");
 
             // create Y axis
             svg.append("g")
              .attr("class", "y axis")
              .call(yAxis)
-             .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 1)
-              .attr("dy", ".71em")
-              .style("text-anchor", "end")
-              .text("household waste per citizen (kg)");
+
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + margin.bottom)
+                .style("text-anchor", "middle")
+                .text("Year")
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 -(margin.left / 2))
+                .attr("x", 0 - (height / 2))
+                .style("text-anchor", "middle")
+                .text("Waste per citizen (kg)");
      });
