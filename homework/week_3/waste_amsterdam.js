@@ -76,6 +76,12 @@
             .orient("left")
             .ticks(11);
 
+        var tip = d3.tip()
+          .attr('class', 'd3-tip')
+          .offset([-10, 0])
+          .html(function(d) {
+            return "<strong>Quantity:</strong> <span style='color:red'>" + d.quantity + "</span>";
+          })
 
         // create SVG element
         var svg = d3.select("body")
@@ -84,6 +90,8 @@
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.call(tip);
 
         xScale.domain(dataset.map(function(d) { return d.year; }));
         yScale.domain([0, max]);
@@ -99,13 +107,21 @@
                 return yScale(d.quantity); })
            .attr("width", xScale.rangeBand())
            .attr("height", function(d) { return height - yScale(d.quantity); })
-            .attr("fill", "teal");
+            .attr("fill", "teal")
+            .on('mouseover', tip.show)
+            .on('mouseout', tip.hide);
 
            // create X axis
            svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + (height) + ")")
             .call(xAxis)
+            .append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("x", width - 100)
+            .attr("y", height - 100)
+            .text("income per capita, inflation-adjusted (dollars)");
 
             // create Y axis
             svg.append("g")
