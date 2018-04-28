@@ -8,7 +8,9 @@
  * station. The graph is included in a web page on github.
  *
  * Source of the data: Source: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?ts=1524649884497
- *
+ * http://bl.ocks.org/Caged/6476579
+ * http://jsbin.com/nuyipikaye/edit?html,js,output
+ * http://www.knowstack.com/different-ways-of-loading-a-d3js-data/
  */
 
     d3.select("head")
@@ -32,43 +34,18 @@
         .append("p")
         .text("Source: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?ts=1524649884497");
 
-    var width = 600, height = 300;
-    var barPadding = 10;
+    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom,
+        barPadding = 10,
+        padding = 30;
 
-    // create SVG element
-    var svg = d3.select("body")
-                    .append("svg")
-                    .attr("width", width)
-                    .attr("height", height);
-
-    // var rect = svg.append("rect")
-    //                 .attr("x", 10)
-    //                 .attr("y", 10)
-    //                 .attr("width", 50)
-    //                 .attr("height", 100);
-    //
-    // var circle = svg.append("circle")
-    //                 .attr("cx", 100)
-    //                 .attr("cy", 20)
-    //                 .attr("r", 20);
-    //
-    //
-    // var text = svg.append("text")
-    //                     .attr("x", 200)
-    //                     .attr("y", 40)
-    //                     .text("hoi")
-    //                     .attr("font-family", "sans-serif")
-    //                     .attr("font-size", "20px")
-    //                     .attr("fill", "red");
-
-     d3.json("waste_amsterdam.json", function(error, data) {
+    d3.json("waste_amsterdam.json", function(error, data) {
         if (error) {
-
             return console.log("Error");
         }
 
         var dataset = data.data;
-        var padding = 100;
         var max = d3.max(dataset, function(d) {    //Returns 480
             return d.quantity;  //References first value in each sub-array
         });
@@ -78,63 +55,66 @@
 
         // create scale functions
         var xScale = d3.scale.ordinal()
-            .domain([0, max])
-            .range([0, width]);
+            .rangeRoundBands([0, width], .1);
+            // // .range([padding, width - padding * 2]);
+            // .domain([0, max])
+            // .range([0, width - 100]);
 
         var yScale = d3.scale.linear()
-            .domain([min, max])
-            .range([padding, height - barPadding]);
+            // .domain([min - 100, max])
+            .range([height, 0]);
 
-        // define x axis
+        // define X axis
         var xAxis = d3.svg.axis()
-                        .scale(xScale)
-                        .orient("bottom")
-                        .ticks(5);
+            .scale(xScale)
+            .orient("bottom")
+            // .ticks(5);
 
-        // define y axis
+        // define Y axis
         var yAxis = d3.svg.axis()
             .scale(yScale)
             .orient("left")
-            .ticks(5);
+            .ticks(11);
+
+
+        // create SVG element
+        var svg = d3.select("body")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        xScale.domain(dataset.map(function(d) { return d.year; }));
+        yScale.domain([0, max]);
 
         // create rectangles
-        svg.selectAll("rect")
+        svg.selectAll(".bar")
            .data(dataset)
            .enter()
            .append("rect")
-           .attr("x", function(d, i) {
-               return i * (width / dataset.length);  //Bar width of 20 plus 1 for padding
-            })
+           .attr("class", "bar")
+           .attr("x", function(d) { return xScale(d.year); })
             .attr("y", function(d) {
-                return height - yScale(d.quantity);  //Height minus data value
-            })
-           .attr("width", width / dataset.length - barPadding)
-           .attr("height", function(d) {
-               return yScale(d.quantity);
-            })
+                return yScale(d.quantity); })
+           .attr("width", xScale.rangeBand())
+           .attr("height", function(d) { return height - yScale(d.quantity); })
             .attr("fill", "teal");
 
-        // create labels
-        svg.selectAll("text")
-           .data(dataset)
-           .enter()
-           .append("text")
-           .text(function(d) {
-               return d.quantity;
-           })
-           .attr("x", function(d, i) {
-                return i * (width / dataset.length);
-           })
-           .attr("y", function(d) {
-                return height - (yScale(d.quantity));
-           })
-           .attr("font-family", "sans-serif")
-           .attr("font-size", "11px")
-           .attr("fill", "black");
-
-           // create x axis
+           // create X axis
            svg.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + (height) + ")")
+            .call(xAxis)
+
+            // create Y axis
+            svg.append("g")
+             .attr("class", "y axis")
+             .call(yAxis)
+             .append("text")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 1)
+              .attr("dy", ".71em")
+              .style("text-anchor", "end")
+              .text("household waste per citizen (kg)");
      });
