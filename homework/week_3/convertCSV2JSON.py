@@ -2,7 +2,7 @@
 # Course: Data Processing
 # Date: 28-04-2018
 #
-# This program converts csv data into JSON format.
+# This program converts data in csv format into JSON format.
 
 import csv
 import json
