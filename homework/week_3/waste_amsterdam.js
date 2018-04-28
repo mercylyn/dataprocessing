@@ -30,8 +30,9 @@
                 in Amsterdam of the years 2001-2016.");
 
     d3.select("body")
-        .append("p")
-        .text("Source: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?ts=1524649884497");
+        .append("a")
+        .attr("href", "https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?ts=1524649884497")
+        .html("Source of data: CBS");
 
     var margin = {top: 50, bottom: 50, right: 20, left: 100},
         width = 960 - margin.left - margin.right,
