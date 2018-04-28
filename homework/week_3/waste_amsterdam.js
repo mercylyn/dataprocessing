@@ -3,15 +3,13 @@
  * Course: Data Processing
  * Date: 28-04-2018
  *
- * Maximum temperature in De Bilt (NL) 1981.
- * This program creates a line graph of the temperature at De Bilt weather
- * station. The graph is included in a web page on github.
+ * Household waste per citizen in Amsterdam 2001-2016.
+ * This program creates a bar graph of the total household waste per citizen
+ * in Amsterdam from the years 2001-2016.
+ * The graph is included in a web page on github.
  *
  * Source of the data: Source: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?ts=1524649884497
- * http://bl.ocks.org/Caged/6476579
- * http://jsbin.com/nuyipikaye/edit?html,js,output
- * http://www.knowstack.com/different-ways-of-loading-a-d3js-data/
- * http://bl.ocks.org/Caged/6476579
+ *
  */
 
     d3.select("head")
@@ -29,13 +27,13 @@
     d3.select("body")
          .append("p")
          .text("The barchart shows the household waste per year in kg per citizen \
-                in Amsterdam of the years 2001 to 2016.");
+                in Amsterdam of the years 2001-2016.");
 
     d3.select("body")
         .append("p")
         .text("Source: https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83452NED/table?ts=1524649884497");
 
-    var margin = {top: 100, bottom: 50, right: 20, left: 100},
+    var margin = {top: 50, bottom: 50, right: 20, left: 100},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom,
         barPadding = 10,
@@ -43,7 +41,7 @@
 
     d3.json("waste_amsterdam.json", function(error, data) {
         if (error) {
-            return console.log("Error");
+            return console.log("Error: json file not found.");
         }
 
         var dataset = data.data;
@@ -70,12 +68,13 @@
         var yAxis = d3.svg.axis()
             .scale(yScale)
             .orient("left")
+            // .tickValues()
 
         var tip = d3.tip()
           .attr('class', 'd3-tip')
           .offset([-10, 0])
           .html(function(d) {
-            return "<strong>Quantity:</strong> <span style='color:orange'>"
+            return "<strong>Total:</strong> <span style='color:orange'>"
                     + d.quantity + "</span>";
           });
 
@@ -122,12 +121,21 @@
                 .attr("x", width / 2)
                 .attr("y", height + margin.bottom)
                 .style("text-anchor", "middle")
+                .style("font-size", "17px")
                 .text("Year")
+
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", 0 - margin.top / 2)
+                .style("text-anchor", "middle")
+                .style("font-size", "20px")
+                .text("Household waste per citizen in Amsterdam");
 
             svg.append("text")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 0 -(margin.left / 2))
                 .attr("x", 0 - (height / 2))
                 .style("text-anchor", "middle")
+                .style("font-size", "17px")
                 .text("Waste per citizen (kg)");
      });
