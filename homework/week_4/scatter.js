@@ -30,65 +30,89 @@ d3.select("body")
  .html("Source of data: OECD")
 
 window.onload = function() {
+    loadData()
+};
 
-    var education2016 = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.ES_EDUA.L.TOT+MN+WMN+HGH+LW/all?&dimensionAtObservation=allDimensions"
-    var lifeSatisf2016 = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.SW+SW_LIFS.L.TOT+MN+WMN+HGH+LW/all?&dimensionAtObservation=allDimensions"
-    var selfReportHealth = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.HS_SFRH.L.TOT+MN+WMN+HGH+LW/all?&dimensionAtObservation=allDimensions"
-
+function loadData() {
+    var education2016 = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.ES_EDUA.L.TOT/all?&dimensionAtObservation=allDimensions"
+    var lifeSatisf2016 = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.SW+SW_LIFS.L.TOT/all?&dimensionAtObservation=allDimensions"
+    var selfReportHealth = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.HS_SFRH.L.TOT/all?&dimensionAtObservation=allDimensions"
+    // var data = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.ES_EDUA+HS_SFRH+SW_LIFS.L.TOT+MN+WMN+HGH+LW/all?&dimensionAtObservation=allDimensions"
     d3.queue()
         .defer(d3.request, education2016)
         .defer(d3.request, lifeSatisf2016)
         .defer(d3.request, selfReportHealth)
-        .awaitAll(doFunction);
+        // .defer(d3.request, data)
+        .awaitAll(getData);
 
-    function doFunction(error, response) {
+    function getData(error, response) {
         if (error) throw error;
 
+        var dataEdu = (JSON.parse(response[0].responseText)).dataSets[0].observations,
+            dataLife = (JSON.parse(response[1].responseText)).dataSets[0].observations,
+            dataHealth = (JSON.parse(response[2].responseText)).dataSets[0].observations
+            dataLength = Object.keys(dataEdu).length;
+
+        var data = convertData(dataEdu, dataLife, dataHealth, dataLength);
+        console.log(dataLength)
+        console.log(data)
+
         console.log(JSON.parse(response[0].responseText))
-        // console.log(JSON.parse(response[1].responseText))
-        // console.log(JSON.parse(response[2].responseText))
 
-        var dataEdu = (JSON.parse(response[0].responseText)).dataSets[0].observations
-        var dataLife = JSON.parse(response[1].responseText)
-        var dataHealth = JSON.parse(response[2].responseText)
+        makePlot(data);
+    }
+}
 
-        // console.log(dataEdu["0:0:0:0"]);
-        // console.log(dataLife.dataSets[0].observations["0:0:0:0"][0]);
-        // console.log(dataHealth.dataSets[0].observations["0:0:0:0"][0]);
+function convertData(dataset1, dataset2, dataset3, dataLength) {
+    var data = [];
 
-
-        for (let i = 0; i < 39; i++) {
-            for (let j = 0; j < 3; j++) {
-                // console.log(i + ":0:0:" + j + ":");
-                var key = i + ":0:0:" + j;
-                // console.log(key)
-                // console.log(dataEdu[key][0])
-            }
+    for (let i = 0; i < dataLength; i++) {
+        for (let j = 0; j < 1; j++) {
+            var key = i + ":0:0:" + j;
+            data.push([dataset1[key][0], dataset2[key][0], dataset3[key][0]]);
         }
     }
-};
 
-const margin = {top: 50, bottom: 50, right: 20, left: 100},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    return data;
+}
 
-let svg = d3.select("body")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+function makePlot(data) {
+    const margin = {top: 20, bottom: 40, right: 30, left: 50},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
 
-var x = d3.scaleLinear()
-    .range([0, width]);
+    var x = d3.scaleLinear()
+        .range([0, width]);
 
-var y = d3.scaleLinear()
-    .range([height, 0]);
+    var y = d3.scaleLinear()
+        .range([height, 0]);
 
-// Add the x Axis
-svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x));
+    x.domain(d3.extent(data, function(d) { return d[0]; })).nice();
+    y.domain(d3.extent(data, function(d) { return d[1]; })).nice();
 
-// Add the y Axis
-svg.append("g")
-    .call(d3.axisLeft(y));
+
+    let svg = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add the x Axis
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    // Add the y Axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    svg.selectAll(".dot")
+        .data(data)
+        .enter().append("circle")
+        .attr("class", "dot")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return x(d[0]); })
+        .attr("cy", function(d) { return y(d[1]); })
+        // .style("fill", function(d) { return color(d.); });
+}
