@@ -77,9 +77,13 @@ function convertData(dataset1, dataset2, dataset3, dataLength) {
 }
 
 function makePlot(data) {
-    const margin = {top: 20, bottom: 40, right: 30, left: 50},
+    const margin = {top: 50, bottom: 50, right: 50, left: 60},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
+
+    var originChart = 0;
+    var paddingYLabel = 20;
+    var paddingXLabel = 100;
 
     var x = d3.scaleLinear()
         .range([0, width]);
@@ -90,6 +94,29 @@ function makePlot(data) {
     x.domain(d3.extent(data, function(d) { return d[0]; })).nice();
     y.domain(d3.extent(data, function(d) { return d[1]; })).nice();
 
+    let maxHealth = d3.max(data, function(d) { return d[2];}),
+        minHealth = d3.min(data, function(d) { return d[2];});
+
+    const healthCat = {bucket1Min: 0, bucket1Max: 40, bucket2Max: 60, bucket3Max: 80, bucket4Max: 100}
+
+    // for (let i = 0; i < dataLength; i++) {
+    var healthCat1 = [], healthCat2 = [], healthCat3 = [], healthCat4 =[];
+
+    for (let i = 0; i < dataLength; i++) {
+        if (data[i][2] >= healthCat.bucket1Min && data[i][2] < healthCat.bucket1Max) {
+            healthCat1.push(data[i][2])
+        }
+        else if (data[i][2] >= healthCat.bucket1Max && data[i][2] < healthCat.bucket2Max) {
+            healthCat2.push(data[i][2])
+        }
+        else if (data[i][2] >= healthCat.bucket2Max && data[i][2] < healthCat.bucket3Max) {
+            healthCat3.push(data[i][2])
+        }
+        else {
+            healthCat4.push(data[i][2])
+        }
+
+    };
 
     let svg = d3.select("body")
         .append("svg")
@@ -107,6 +134,7 @@ function makePlot(data) {
     svg.append("g")
         .call(d3.axisLeft(y));
 
+    // add dots
     svg.selectAll(".dot")
         .data(data)
         .enter().append("circle")
@@ -114,5 +142,71 @@ function makePlot(data) {
         .attr("r", 3.5)
         .attr("cx", function(d) { return x(d[0]); })
         .attr("cy", function(d) { return y(d[1]); })
-        // .style("fill", function(d) { return color(d.); });
+        .style("fill", function(d) {
+            if (healthCat1.includes(d[2])) {
+                return "#ffffcc";
+            }
+            else if (healthCat2.includes(d[2])) {
+                return "#a1dab4";
+            }
+            else if (healthCat2.includes(d[2])) {
+                return "#41b6c4";
+            }
+            else {
+                return "#225ea8";
+            }
+        });
+
+    // var color = d3.scaleOrdinal()
+    //     .domain(["0-40", "40-60", "60-80", "80-100"])
+    //     .range([ "#ffffcc", "#a1dab4", "#41b6c4", "#225ea8"]);
+
+    var category = ["0-40", "40-60", "60-80", "80-100"];
+
+    var legend = svg.selectAll(".legend")
+        .data(category)
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+    legend.append("rect")
+        .attr("x", width - 18)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", function(d) {
+            if (d === "0-40") {
+                return "#ffffcc";
+            }
+            else if (d === "40-60") {
+                return "#a1dab4";
+            }
+            else if (d === "60-80") {
+                return "#41b6c4";
+            }
+            else {
+                return "#225ea8";
+            }
+        });
+
+    legend.append("text")
+        .attr("x", width + margin.right)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) { return d; });
+
+        // X axis label
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom)
+        .style("font-size", "17px")
+        .text("Educational attainment (%)")
+
+    // Y axis label
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", originChart - (margin.left - paddingYLabel))
+        .attr("x", originChart - (height - paddingXLabel))
+        .style("font-size", "17px")
+        .text("Life satisfaction (Average score)");
 }
