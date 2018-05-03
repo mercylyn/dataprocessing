@@ -99,7 +99,6 @@ function makePlot(data) {
 
     const healthCat = {bucket1Min: 0, bucket1Max: 40, bucket2Max: 60, bucket3Max: 80, bucket4Max: 100}
 
-    // for (let i = 0; i < dataLength; i++) {
     var healthCat1 = [], healthCat2 = [], healthCat3 = [], healthCat4 =[];
 
     for (let i = 0; i < dataLength; i++) {
