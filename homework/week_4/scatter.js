@@ -14,7 +14,7 @@ d3.select("head")
 
 d3.select("body")
   .append("h1")
-  .text("Better Life Index: education attainment, life satisfaction and self-reported health")
+  .text("Better Life Index: Education, Health & Life Satisfaction")
 
 d3.select("body")
  .append("h2")
@@ -34,32 +34,41 @@ window.onload = function() {
 };
 
 function loadData() {
-    var education2016 = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.ES_EDUA.L.TOT/all?&dimensionAtObservation=allDimensions"
-    var lifeSatisf2016 = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.SW+SW_LIFS.L.TOT/all?&dimensionAtObservation=allDimensions"
-    var selfReportHealth = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.HS_SFRH.L.TOT/all?&dimensionAtObservation=allDimensions"
-    // var data = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.ES_EDUA+HS_SFRH+SW_LIFS.L.TOT+MN+WMN+HGH+LW/all?&dimensionAtObservation=allDimensions"
+    var education2016 = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS.ES_EDUA.L.TOT/all?&dimensionAtObservation=allDimensions"
+    var lifeSatisf2016 = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS.SW+SW_LIFS.L.TOT/all?&dimensionAtObservation=allDimensions"
+    var reportHealth2016 = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS.HS_SFRH.L.TOT/all?&dimensionAtObservation=allDimensions"
+
+    var education2015 = "https://stats.oecd.org/SDMX-JSON/data/BLI2015/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS.ES_EDUA.L.TOT/all?&dimensionAtObservation=allDimensions"
+    var lifeSatisf2015 = "https://stats.oecd.org/SDMX-JSON/data/BLI2015/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS.SW_LIFS.L.TOT/all?&dimensionAtObservation=allDimensions"
+    var reportHealth2015 = "https://stats.oecd.org/SDMX-JSON/data/BLI2015/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS.HS_SFRH.L.TOT/all?&dimensionAtObservation=allDimensions"
+
     d3.queue()
         .defer(d3.request, education2016)
         .defer(d3.request, lifeSatisf2016)
-        .defer(d3.request, selfReportHealth)
-        // .defer(d3.request, data)
+        .defer(d3.request, reportHealth2016)
+        .defer(d3.request, education2015)
+        .defer(d3.request, lifeSatisf2015)
+        .defer(d3.request, reportHealth2015)
         .awaitAll(getData);
 
     function getData(error, response) {
         if (error) throw error;
 
-        var dataEdu = (JSON.parse(response[0].responseText)).dataSets[0].observations,
-            dataLife = (JSON.parse(response[1].responseText)).dataSets[0].observations,
-            dataHealth = (JSON.parse(response[2].responseText)).dataSets[0].observations
-            dataLength = Object.keys(dataEdu).length;
+        var dataEdu16 = (JSON.parse(response[0].responseText)).dataSets[0].observations,
+            dataLife16 = (JSON.parse(response[1].responseText)).dataSets[0].observations,
+            dataHealth16 = (JSON.parse(response[2].responseText)).dataSets[0].observations,
+            dataEdu15 = (JSON.parse(response[3].responseText)).dataSets[0].observations,
+            dataLife15 = (JSON.parse(response[4].responseText)).dataSets[0].observations,
+            dataHealth15 = (JSON.parse(response[5].responseText)).dataSets[0].observations,
+            dataLength16 = Object.keys(dataEdu16).length,
+            dataLength15 = Object.keys(dataEdu15).length;
 
-        var data = convertData(dataEdu, dataLife, dataHealth, dataLength);
-        console.log(dataLength)
-        console.log(data)
 
-        console.log(JSON.parse(response[0].responseText))
+        var data2016 = convertData(dataEdu16, dataLife16, dataHealth16, dataLength16),
+            data2015 = convertData(dataEdu15, dataLife15, dataHealth15, dataLength15);
 
-        makePlot(data);
+        makePlot(data2016);
+        // makePlot(data2015);
     }
 }
 
@@ -77,23 +86,26 @@ function convertData(dataset1, dataset2, dataset3, dataLength) {
 }
 
 function makePlot(data) {
-    const margin = {top: 50, bottom: 50, right: 50, left: 60},
+    const margin = {top: 100, bottom: 50, right: 50, left: 60},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
     var originChart = 0;
     var paddingYLabel = 20;
-    var paddingXLabel = 100;
+    var paddingXLabel = 10;
 
+    // Set the ranges
     var x = d3.scaleLinear()
-        .range([0, width]);
+        .range([0, width]),
 
-    var y = d3.scaleLinear()
+        y = d3.scaleLinear()
         .range([height, 0]);
 
+    // Scale the domain of the data
     x.domain(d3.extent(data, function(d) { return d[0]; })).nice();
     y.domain(d3.extent(data, function(d) { return d[1]; })).nice();
 
+    // Determine max/min data
     let maxHealth = d3.max(data, function(d) { return d[2];}),
         minHealth = d3.min(data, function(d) { return d[2];});
 
@@ -101,7 +113,7 @@ function makePlot(data) {
 
     var healthCat1 = [], healthCat2 = [], healthCat3 = [], healthCat4 =[];
 
-    for (let i = 0; i < dataLength; i++) {
+    for (let i = 0; i < data.length; i++) {
         if (data[i][2] >= healthCat.bucket1Min && data[i][2] < healthCat.bucket1Max) {
             healthCat1.push(data[i][2])
         }
@@ -117,6 +129,7 @@ function makePlot(data) {
 
     };
 
+    // Add the svg canvas
     let svg = d3.select("body")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -124,12 +137,12 @@ function makePlot(data) {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Add the x Axis
+    // Add the X axis
     svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
 
-    // Add the y Axis
+    // Add the Y axis
     svg.append("g")
         .call(d3.axisLeft(y));
 
@@ -138,7 +151,7 @@ function makePlot(data) {
         .data(data)
         .enter().append("circle")
         .attr("class", "dot")
-        .attr("r", 3.5)
+        .attr("r", 5)
         .attr("cx", function(d) { return x(d[0]); })
         .attr("cy", function(d) { return y(d[1]); })
         .style("fill", function(d) {
@@ -155,10 +168,6 @@ function makePlot(data) {
                 return "#225ea8";
             }
         });
-
-    // var color = d3.scaleOrdinal()
-    //     .domain(["0-40", "40-60", "60-80", "80-100"])
-    //     .range([ "#ffffcc", "#a1dab4", "#41b6c4", "#225ea8"]);
 
     var category = ["0-40", "40-60", "60-80", "80-100"];
 
@@ -199,13 +208,33 @@ function makePlot(data) {
         .attr("x", width / 2)
         .attr("y", height + margin.bottom)
         .style("font-size", "17px")
+        .attr("text-anchor", "middle")
         .text("Educational attainment (%)")
 
     // Y axis label
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", originChart - (margin.left - paddingYLabel))
-        .attr("x", originChart - (height - paddingXLabel))
+        .attr("x", originChart - (height - margin.bottom * 2))
         .style("font-size", "17px")
         .text("Life satisfaction (Average score)");
-}
+
+    // Scatter plot title
+    svg.append("text")
+        .attr("class","title")
+        .attr("x", (width / 2))
+        .attr("y", originChart - margin.top / 2)
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+        .style("text-decoration", "underline")
+        .text("Better Life Index: Education, Health & Life Satisfaction");
+
+        // Legenda title
+        svg.append("text")
+            .attr("class","title")
+            .attr("x", 730)
+            .attr("y", originChart - margin.top / 4)
+            // .attr("text-anchor", "end")
+            .style("font-size", "12px")
+            .text("Color: Self-reported Health (%)");
+};
