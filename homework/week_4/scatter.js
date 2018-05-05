@@ -209,7 +209,7 @@ function loadPlot(data) {
         };
 
     var menu = d3.select("#dropdown");
-    var year = ["2015", "2016"];
+    var year = ["2016", "2015"];
 
     menu
     .append("select")
@@ -228,8 +228,8 @@ function loadPlot(data) {
 
     function updateData(data) {
         console.log("hoi")
-        d3.select("h3")
-            .on("click", function() {
+        d3.select("#dropdown")
+            .on("change", function() {
                 // get data
                 if (data == data2016) {
                     data = data2015
