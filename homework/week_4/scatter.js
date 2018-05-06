@@ -304,7 +304,9 @@ function loadPlot(data) {
 
                 // Update scale domains
                 x.domain(d3.extent(data, function(d) { return d[0]; })).nice();
-                y.domain([d3.min(data, function(d) { return d[1]; }) - correctScale, d3.max(data, function(d) { return d[1]; })]).nice();
+                y.domain([d3.min(data, function(d) { return d[1]; }) -
+                                 correctScale, d3.max(data, function(d) {
+                                 return d[1]; })]).nice();
 
                 // Update circles
                 svg.selectAll("circle")
