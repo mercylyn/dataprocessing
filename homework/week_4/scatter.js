@@ -19,7 +19,7 @@ window.onload = function() {
     loadData()
 };
 
-var data2015, data2016,
+let data2015, data2016,
     countryList = [];
 
 // Collecting data through API
@@ -113,6 +113,7 @@ function loadPlot(data) {
 
     const originChart = 0,
         paddingYLabel = 20;
+        xLegend = 730;
 
     // Set the ranges
     let x = d3.scaleLinear()
@@ -140,7 +141,7 @@ function loadPlot(data) {
 
     /* Categorizes the third variable: self-reported Health into 4 categories
        (percentage: 0-40%, 40-60%, 60-80%, 80-100%). */
-    function categorizeHealth(data){
+    function categorizeHealth(data) {
 
         // Categorize data into percentage category
         for (let i = 0; i < data.length; i++) {
@@ -211,7 +212,7 @@ function loadPlot(data) {
         .attr("class", "y axis")
         .call(yAxis)
 
-    addLegend(data)
+    addLegend(data);
 
     /* Adds a legend to the svg canvas. */
     function addLegend(dataset) {
@@ -255,7 +256,7 @@ function loadPlot(data) {
     // Legend title
     svg.append("text")
         .attr("class","title")
-        .attr("x", 730)
+        .attr("x", xLegend)
         .attr("y", originChart - margin.top / 4)
         .style("font-size", "12px")
         .text("Color: Self-reported Health");
@@ -263,7 +264,7 @@ function loadPlot(data) {
     // Legend explanation
     svg.append("text")
         .attr("class","title")
-        .attr("x", 730)
+        .attr("x", xLegend)
         .attr("y", originChart - paddingYLabel / 2)
         .style("font-size", "12px")
         .text("(% reported good)");
@@ -286,7 +287,7 @@ function loadPlot(data) {
             return d;
         })
 
-    updateData(data)
+    updateData(data);
 
     /* Updates the data when users switches to another year in dropdown menu. */
     function updateData(data) {

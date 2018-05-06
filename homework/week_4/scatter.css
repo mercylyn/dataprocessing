@@ -10,7 +10,22 @@
  */
 
 body {
-font: 10px Arial;
+    font: 10px Arial;
+    color: #1c9099;
+}
+
+h1, h2, #dropdown {
+    text-align: center;
+}
+
+a:link, a:visited {
+    background-color: #1c9099;
+    color: white;
+    padding: 14px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
 }
 
 .axis path,
@@ -21,38 +36,32 @@ font: 10px Arial;
 }
 
 .dot {
-  stroke: #000;
-}
-
-.button {
-    float: left
+    stroke: #000;
 }
 
 .d3-tip {
-  line-height: 1;
-  padding: 6px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  border-radius: 4px;
-  font-size: 12px;
+    line-height: 1;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
 }
 
-/* Creates a small triangle extender. */
 .d3-tip:after {
- box-sizing: border-box;
- display: inline;
- font-size: 10px;
- width: 100%;
- line-height: 1;
- color: rgba(0, 0, 0, 0.8);
- content: "\25BC";
- position: absolute;
- text-align: center;
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
 }
 
-/* Style northward. */
 .d3-tip.n:after {
- margin: -2px 0 0 0;
- top: 100%;
- left: 0;
+    margin: -2px 0 0 0;
+    top: 100%;
+    left: 0;
 }
