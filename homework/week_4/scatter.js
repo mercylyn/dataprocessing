@@ -1,19 +1,26 @@
 /**
  * Name: Mercylyn Wiemer
  * Course: Data Processing
- * Date: 04-05-2018
+ * Date: 06-05-2018
+ *
+ * Better Life Index: Education, Health & Life Satisfaciton, Scatter plot of
+ * 2015/2016.
  *
  * https://bl.ocks.org/d3noob/23e42c8f67210ac6c678db2cd07a747e
  * https://bl.ocks.org/shimizu/914c769f05f1b2e1d09428c7eedd7f8a
  * http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
  * https://bl.ocks.org/sebg/6f7f1dd55e0c52ce5ee0dac2b2769f4b
  * https://bl.ocks.org/ProQuestionAsker/9a909417edf206f2d3ff38cd41a30524/c7c24def8aea8d2e3f50453ee1d963e8f6ffc09b
+ * http://bl.ocks.org/davegotz/bd54b56723c154d25eedde6504d30ad7
  */
+
+/* Run code when files are loaded. */
 window.onload = function() {
     loadData()
 };
 
-var data2015, data2016;
+var data2015, data2016,
+    countryList = [];
 
 // Collecting data through API
 function loadData() {
@@ -39,39 +46,64 @@ function loadData() {
     function parseData(error, response) {
         if (error) throw error;
 
-        var dataEdu16 = (JSON.parse(response[0].responseText)).dataSets[0].observations,
-            dataLife16 = (JSON.parse(response[1].responseText)).dataSets[0].observations,
-            dataHealth16 = (JSON.parse(response[2].responseText)).dataSets[0].observations,
+        let dataEdu16 = getData(convertToJSON(response[0].responseText)),
+            dataLife16 = getData(convertToJSON(response[1].responseText)),
+            dataHealth16 = getData(convertToJSON(response[2].responseText)),
+            dataCountry = convertToJSON(response[0].responseText).structure.dimensions.observation[0].values,
 
-            dataEdu15 = (JSON.parse(response[3].responseText)).dataSets[0].observations,
-            dataLife15 = (JSON.parse(response[4].responseText)).dataSets[0].observations,
-            dataHealth15 = (JSON.parse(response[5].responseText)).dataSets[0].observations,
+            dataEdu15 = getData(convertToJSON(response[3].responseText)),
+            dataLife15 = getData(convertToJSON(response[4].responseText)),
+            dataHealth15 = getData(convertToJSON(response[5].responseText)),
 
-            dataLength16 = Object.keys(dataEdu16).length,
-            dataLength15 = Object.keys(dataEdu15).length;
+            dataLength = Object.keys(dataEdu16).length;
 
+        // List of countries: data
+        getCountry(dataCountry);
 
-        data2016 = convertData(dataEdu16, dataLife16, dataHealth16, dataLength16),
-        data2015 = convertData(dataEdu15, dataLife15, dataHealth15, dataLength15);
+        // Join dataset together
+        data2016 = convertData(dataEdu16, dataLife16, dataHealth16, countryList, dataLength),
+        data2015 = convertData(dataEdu15, dataLife15, dataHealth15, countryList, dataLength);
 
+        // Initialize scatter plot 2016
         loadPlot(data2016);
-        // loadPlot(data2015);
     }
 }
 
-function convertData(dataset1, dataset2, dataset3, dataLength) {
-    var data = [];
+/* Convert data to JSON format. */
+function convertToJSON(data) {
+    return JSON.parse(data)
+}
 
+/* Get data from JSON object. */
+function getData(data) {
+    return data.dataSets[0].observations
+}
+
+/* Return list of countries belonging to data 2016/2015. */
+function getCountry(data) {
+
+    // Get country from dataset
+    for (let i = 0; i < data.length; i++) {
+        countryList.push(data[i].name);
+    }
+}
+
+/* Converts data from JSON to an array containing three variables. */
+function convertData(dataset1, dataset2, dataset3, dataset4, dataLength) {
+    let data = [];
+
+    // Add data variables to array
     for (let i = 0; i < dataLength; i++) {
         for (let j = 0; j < 1; j++) {
             var key = i + ":0:0:" + j;
-            data.push([dataset1[key][0], dataset2[key][0], dataset3[key][0]]);
+            data.push([dataset1[key][0], dataset2[key][0], dataset3[key][0], dataset4[i]]);
         }
     }
 
     return data;
 }
 
+/* Creates canvas to draw on: scatter plot with x and y axis. */
 function loadPlot(data) {
 
     // Set dimensions of canvas
@@ -79,21 +111,21 @@ function loadPlot(data) {
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
-    var originChart = 0,
+    const originChart = 0,
         paddingYLabel = 20;
 
     // Set the ranges
-    var x = d3.scaleLinear()
+    let x = d3.scaleLinear()
         .range([0, width]),
 
         y = d3.scaleLinear()
         .range([height, 0]);
 
     // Define X axis
-    var xAxis = d3.axisBottom(x);
+    let xAxis = d3.axisBottom(x),
 
     // Define Y axis
-    var yAxis = d3.axisLeft(y);
+        yAxis = d3.axisLeft(y);
 
     // Scale the domain of the data
     x.domain(d3.extent(data, function(d) { return d[0]; })).nice();
@@ -106,6 +138,8 @@ function loadPlot(data) {
 
     categorizeHealth(data);
 
+    /* Categorizes the third variable: self-reported Health into 4 categories
+       (percentage: 0-40%, 40-60%, 60-80%, 80-100%). */
     function categorizeHealth(data){
 
         // Categorize data into percentage category
@@ -133,6 +167,14 @@ function loadPlot(data) {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    // Setup the tool tip.
+    let tool_tip = d3.tip()
+        .attr("class", "d3-tip")
+        .offset([-8, 0])
+        .html(function(d) { return "Country: " + d[3]; });
+
+    svg.call(tool_tip);
+
     // Create dots
     svg.selectAll(".dot")
         .data(data)
@@ -141,6 +183,8 @@ function loadPlot(data) {
         .attr("r", 5)
         .attr("cx", function(d) { return x(d[0]); })
         .attr("cy", function(d) { return y(d[1]); })
+        .on('mouseover', tool_tip.show)
+        .on('mouseout', tool_tip.hide)
         .style("fill", function(d) {
             if (healthCat1.includes(d[2])) {
                 return "#ffffcc";
@@ -169,16 +213,17 @@ function loadPlot(data) {
 
     addLegend(data)
 
+    /* Adds a legend to the svg canvas. */
     function addLegend(dataset) {
         var category = ["0-40", "40-60", "60-80", "80-100"];
 
-        var legend = svg.selectAll(".legend")
+        let legend = svg.selectAll(".legend")
             .data(category)
             .enter().append("g")
             .attr("class", "legend")
             .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-        // create legenda color blocks
+        // Create legend color blocks: colors indicate third variable (self reported Health)
         legend.append("rect")
             .attr("x", width - 18)
             .attr("width", 18)
@@ -198,19 +243,36 @@ function loadPlot(data) {
                 }
             });
 
-        // create legenda
+        // Create legend
         legend.append("text")
             .attr("x", width + margin.right)
             .attr("y", 9)
             .attr("dy", ".35em")
             .style("text-anchor", "end")
             .text(function(d) { return d; });
+    };
 
-        };
+    // Legend title
+    svg.append("text")
+        .attr("class","title")
+        .attr("x", 730)
+        .attr("y", originChart - margin.top / 4)
+        .style("font-size", "12px")
+        .text("Color: Self-reported Health");
 
-    var menu = d3.select("#dropdown");
-    var year = ["2016", "2015"];
+    // Legend explanation
+    svg.append("text")
+        .attr("class","title")
+        .attr("x", 730)
+        .attr("y", originChart - paddingYLabel / 2)
+        .style("font-size", "12px")
+        .text("(% reported good)");
 
+
+    let menu = d3.select("#dropdown");
+    let year = ["2016", "2015"];
+
+    // Create dropdown menu
     menu
     .append("select")
     .selectAll("option")
@@ -226,11 +288,11 @@ function loadPlot(data) {
 
     updateData(data)
 
+    /* Updates the data when users switches to another year in dropdown menu. */
     function updateData(data) {
-        console.log("hoi")
         d3.select("#dropdown")
             .on("change", function() {
-                // get data
+                // get data depending on user input
                 if (data == data2016) {
                     data = data2015
                 } else {
@@ -254,6 +316,7 @@ function loadPlot(data) {
                     .attr("cy", function(d) {
                         return y(d[1]);
                     })
+                    // fill circles with different colors: third variable; health category
                     .style("fill", function(d) {
                         if (healthCat1.includes(d[2])) {
                             return "#ffffcc";
@@ -283,13 +346,13 @@ function loadPlot(data) {
                 });
     }
 
-        // X axis label
+    // X axis label
     svg.append("text")
         .attr("x", width / 2)
         .attr("y", height + margin.bottom - (paddingYLabel / 2))
         .style("font-size", "17px")
         .attr("text-anchor", "middle")
-        .text("Educational attainment (%)")
+        .text("Educational attainment (%)");
 
     // Y axis label
     svg.append("text")
@@ -308,12 +371,4 @@ function loadPlot(data) {
         .style("font-size", "20px")
         .style("text-decoration", "underline")
         .text("Better Life Index: Education, Health & Life Satisfaction");
-
-        // Legenda title
-        svg.append("text")
-            .attr("class","title")
-            .attr("x", 730)
-            .attr("y", originChart - margin.top / 4)
-            .style("font-size", "12px")
-            .text("Color: Self-reported Health (%)");
 };
