@@ -101,15 +101,15 @@ function loadsvg() {
     // 	.projection(projection);
 }
 
-function makeMyMap(error, states, cities) {
-	svg.append('path')
-		.datum(topojson.feature(states, states.objects.usStates))
-			.attr('d', path)
-			.attr('class', 'states');
-	svg.selectAll('.cities')
-		.data(cities.features)
-		.enter()
-		.append('path')
-		.attr('d', path.pointRadius(5))
-		.attr('class', 'cities');
-}
+// function makeMyMap(error, states, cities) {
+// 	svg.append('path')
+// 		.datum(topojson.feature(states, states.objects.usStates))
+// 			.attr('d', path)
+// 			.attr('class', 'states');
+// 	svg.selectAll('.cities')
+// 		.data(cities.features)
+// 		.enter()
+// 		.append('path')
+// 		.attr('d', path.pointRadius(5))
+// 		.attr('class', 'cities');
+// }
