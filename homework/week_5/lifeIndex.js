@@ -26,13 +26,13 @@ window.onload = function() {
 function loadData() {
     const lifeExpectancy = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HS_LEB.L.TOT/all?&dimensionAtObservation=allDimensions"
     const waterQuality = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.EQ_WATER.L.TOT/all?&dimensionAtObservation=allDimensions"
-    const basicFacilities = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HO_BASE.L.TOT/all?&dimensionAtObservation=allDimensions"
+    // const basicFacilities = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HO_BASE.L.TOT/all?&dimensionAtObservation=allDimensions"
 
     // requests queries: when fulfilled, continue
     d3.queue()
         .defer(d3.request, lifeExpectancy)
         .defer(d3.request, waterQuality)
-        .defer(d3.request, basicFacilities)
+        // .defer(d3.request, basicFacilities)
         .awaitAll(parseData);
 
     // convert data to JSON
@@ -47,8 +47,8 @@ function loadData() {
             // dataCountry3 = JSON.parse(response[2].responseText).structure.dimensions.observation[0].values;
 
 
-        console.log(dataLife);
-        console.log(dataWater);
+        // console.log(JSON.parse(response[0].responseText));
+        // console.log(dataWater);
         // console.log(dataBasic);
 
         dataLength = Object.keys(dataLife).length;
@@ -58,14 +58,21 @@ function loadData() {
         // countryList2 = getCountry(dataCountry2);
         // countryList3 = getCountry(dataCountry3);
         console.log(countryList1);
-        // console.log(countryList3);
+
+        listLife = getData(dataLife, dataLength);
+        console.log(listLife);
+
+        categoryLife = categorizeLife(listLife);
+        console.log(categoryLife);
 
         // Join dataset together
-        data2016 = convertToDictionary(dataLife, dataWater, countryList1, dataLength);
+        data2016 = convertToDictionary(listLife, categoryLife, countryList1);
 
         console.log(data2016);
+
         loadMap(data2016);
-        loadsvg(data2016);
+
+        // loadsvg(data2016);
         // data2016.forEach(function(element) {
         //     console.log(element);
         // });
@@ -89,47 +96,89 @@ function loadData() {
 //         dataJSON.push{}
 //     })
 // }
+
+/* Categorize country: life expectancy (years). Three categories 1) 70-75,
+   2) 75-80, 3) 80-85. */
+
 /* Converts data from JSON to an array containing three variables. */
-function convertToDictionary(dataset1, dataset2, countryList, dataLength) {
+function getData(dataset1, dataLength) {
     let data = [];
-    let dataCountry = {};
 
     // Add data variables to array
     for (let i = 0; i < dataLength; i++) {
         for (let j = 0; j < 1; j++) {
             var key = i + ":0:0:" + j;
-            data.push({
-                // "lifeExpect": JSON.stringify(dataset1[key][0]),
-                // "waterQuality": JSON.stringify(dataset2[key][0])
-                "lifeExpect": dataset1[key][0],
-                "waterQuality": dataset2[key][0]
-            });
+            data.push(dataset1[key][0]);
         }
     }
+
+    return data;
+}
+
+function categorizeLife(data) {
+
+    // Create categories (4) for third variable: self-reported health
+    const lifeCat = {bucket1Min: 70, bucket1Max: 75, bucket2Max: 80, bucket3Max: 85}
+    var category = [];
+
+    for (let i = 0; i < data.length; i++) {
+
+        var lifeExpect = data[i];
+
+        if (lifeExpect >= lifeCat.bucket1Min && lifeExpect < lifeCat.bucket1Max) {
+            category.push('LOW')
+        }
+        else if (lifeExpect >= lifeCat.bucket1Max && lifeExpect < lifeCat.bucket2Max) {
+            category.push('MEDIUM')
+        }
+        else {
+            category.push('HIGH')
+        }
+    };
+
+    return category;
+};
+
+/* Converts data from JSON to an array containing three variables. */
+function convertToDictionary(dataset, categoryLife, countryList) {
+    let data = [];
+    let dataCountry = {};
+
+    // Add data variables to array
+    for (let i = 0; i < dataset.length; i++) {
+            data.push({
+                fillKey: categoryLife[i],
+                lifeExpect: dataset[i]
+            });
+        }
     //
-    for (let i = 0; i < dataLength; i++) {
+    for (let i = 0; i < categoryLife.length; i++) {
         // dataCountry[JSON.stringify(countryList[i])] = JSON.stringify(data[i])
         dataCountry[countryList[i]] = data[i]
     }
 
-    return JSON.parse(JSON.stringify(dataCountry));
-}
+    // return JSON.parse(JSON.stringify(dataCountry));
+    return {dataCountry};
+};
 
 
 function loadMap(dataLife) {
     var map = new Datamap({
         scope: 'world',
         element: document.getElementById('container'),
-        data: dataLife,
+        fills: {
+            HIGH: '#afafaf',
+            LOW: '#123456',
+            MEDIUM: 'blue',
+            // UNKNOWN: 'rgb(0,0,0)',
+            defaultFill: 'green'
+        },
         geographyConfig: {
-            highlightBorderColor: '#bada55',
-            highlightBorderWidth: 2,
-            popupTemplate: function(geography, data) {
-                if(data) { //helaas een probleem met data.. hier zou ik graag hulp bij willen!!
-                    console.log("test");
-                    return '<div class="hoverinfo"><strong>' + data.lifeExpect + '</strong> % in ' +
-                            geography.properties.name + '</div>';
-                }
+            popupTemplate: function(geo, data) {
+                return ['<div class="hoverinfo"><strong>',
+                        'Country: ' + geo.properties.name,
+                        ', life expectancy: ' + data.lifeExpect + ' years',
+                        '</strong></div>'].join('');
             }
         },
         setProjection: function(element) {
@@ -152,84 +201,84 @@ function getCountry(data) {
 
     // Get country from dataset
     for (let i = 0; i < data.length; i++) {
-        countryList.push(data[i].name);
+        countryList.push(data[i].id);
     }
 
     return countryList;
 }
 
 /* Creates canvas to draw on: scatter plot with x and y axis. */
-function loadsvg(data) {
-
-    // Set dimensions of canvas
-    const margin = {top: 100, bottom: 50, right: 50, left: 60},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom,
-        barHeight = 20;
-
-        var x = d3.scale.ordinal()
-        .rangeRoundBands([0, width], .1);
-
-    var x = d3.scale.ordinal()
-        .rangeRoundBands([0, width], .1);
-
-    var y = d3.scale.linear()
-        .range([height, 0]);
-
-    var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left");
-
-    var svg = d3.select("body").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
-
-    let dataWater = [];
-    let dataCountry = [];
-    let dataset = [];
-
-    for (var key in data) {
-
-        // d.lifeExpect = +d.lifeExpect;
-        // console.log(key, data[key].lifeExpect);
-        dataWater.push(data[key].lifeExpect);
-        dataCountry.push(key);
-        // d.waterQuality = +d.waterQuality;
-    }
-
-    for (let i = 0; i < dataCountry.length; i++) {
-        dataset.push(data[dataCountry[i]]);
-    }
-    // console.log(data[dataCountry[0]]);
-    console.log(dataset);
-
-    x.domain(dataCountry.map(function(d) { return d; }));
-    y.domain([0, d3.max(dataWater, function(d) { return d; })]);
-
-    // create X axis
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + (height) + ")")
-        .call(xAxis)
-
-    // create Y axis
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-
-    svg.selectAll("bar")
-            .data(dataset)
-        .enter().append("rect")
-            .style("fill", "steelblue")
-            .attr("x", dataCountry.forEach(function(element) { return x(element); }))
-            .attr("width", x.rangeBand())
-            .attr("y", function(d) { return y(d.waterQuality); })
-            .attr("height", function(d) { return height - y(d.value); });
-}
+// function loadsvg(data) {
+//
+//     // Set dimensions of canvas
+//     const margin = {top: 100, bottom: 50, right: 50, left: 60},
+//         width = 960 - margin.left - margin.right,
+//         height = 500 - margin.top - margin.bottom,
+//         barHeight = 20;
+//
+//         var x = d3.scale.ordinal()
+//         .rangeRoundBands([0, width], .1);
+//
+//     var x = d3.scale.ordinal()
+//         .rangeRoundBands([0, width], .1);
+//
+//     var y = d3.scale.linear()
+//         .range([height, 0]);
+//
+//     var xAxis = d3.svg.axis()
+//         .scale(x)
+//         .orient("bottom");
+//
+//     var yAxis = d3.svg.axis()
+//         .scale(y)
+//         .orient("left");
+//
+//     var svg = d3.select("body").append("svg")
+//         .attr("width", width + margin.left + margin.right)
+//         .attr("height", height + margin.top + margin.bottom)
+//         .append("g")
+//         .attr("transform",
+//               "translate(" + margin.left + "," + margin.top + ")");
+//
+//     let dataset = [];
+//     let dataCountry = [];
+//
+//     for (var key in data) {
+//
+//         // d.lifeExpect = +d.lifeExpect;
+//         // console.log(key, data[key].lifeExpect);
+//         dataset.push([key, data[key].lifeExpect, data[key].waterQuality]);
+//         dataCountry.push(key);
+//         // d.waterQuality = +d.waterQuality;
+//     }
+//
+//     console.log(dataset);
+//     // for (let i = 0; i < dataCountry.length; i++) {
+//     //     dataset.push(data[dataCountry[i]]);
+//     // }
+//     // // console.log(data[dataCountry[0]]);
+//     // console.log(dataset);
+//
+//     x.domain(dataset.map(function(d) { return d[0]; }));
+//     y.domain([0, d3.max(dataset, function(d) { return d[1]; })]);
+//
+//     // create X axis
+//     svg.append("g")
+//         .attr("class", "x axis")
+//         .attr("transform", "translate(0," + (height) + ")")
+//         .call(xAxis)
+//
+//     // create Y axis
+//     svg.append("g")
+//         .attr("class", "y axis")
+//         .call(yAxis)
+//
+//     svg.selectAll("bar")
+//             .data(dataset)
+//         .enter().append("rect")
+//             .style("fill", "steelblue")
+//             .attr("x", dataCountry.forEach(function(element) { return x(element); }))
+//             .attr("width", x.rangeBand())
+//             .attr("y", function(d) { return y(d.waterQuality); })
+//             .attr("height", function(d) { return height - y(d.value); });
+// }
