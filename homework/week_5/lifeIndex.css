@@ -10,3 +10,7 @@ body {
     color: #43a2ca;
     text-align: center;
 }
+
+svg {
+    position: center;
+}
