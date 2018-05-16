@@ -16,7 +16,7 @@ function loadData() {
     const lifeExpectancy = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HS_LEB.L.TOT/all?&dimensionAtObservation=allDimensions"
     const waterQuality = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.EQ_WATER.L.TOT/all?&dimensionAtObservation=allDimensions"
     const selfHealth = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HS_SFRH.L.TOT/all?&dimensionAtObservation=allDimensions"
-    const airPol = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA+OECD+NMEC+BRA+RUS+ZAF.EQ_AIRP.L.TOT+MN+WMN+HGH+LW/all?&dimensionAtObservation=allDimensions"
+    const airPol = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS+.EQ_AIRP.L.TOT/all?&dimensionAtObservation=allDimensions"
 
     // Requests queries: when fulfilled, continue
     d3.queue()
@@ -36,6 +36,7 @@ function loadData() {
             dataAir = JSON.parse(response[3].responseText).dataSets[0].observations,
             dataCountry = JSON.parse(response[0].responseText).structure.dimensions.observation[0].values;
 
+            console.log(dataAir);
         // Get length of data
         let dataLength = Object.keys(dataLife).length;
 
@@ -44,8 +45,12 @@ function loadData() {
 
         let listData = getData(dataLife, dataWater, dataHealth, dataAir, dataLength);
 
+        console.log(listData)
         let categoryLife = categorizeLife(listData);
         console.log(categoryLife);
+
+        let categoryPol = categorizePollution(listData);
+        console.log(categoryPol);
 
         // Join dataset together
         let data2016 = convertToDictionary(listData, categoryLife, countryList);
@@ -77,7 +82,7 @@ function getData(dataset1, dataset2, dataset3, dataset4, dataLength) {
 function categorizeLife(data) {
 
     // Create categories (3): life expectancy
-    const lifeCat = {bucket1Min: 70, bucket1Max: 75, bucket2Max: 80, bucket3Max: 85}
+    const lifeCat = {bucket1Min: 70, bucket1Max: 75, bucket2Max: 80}
     let category = [];
 
     // Fetch data from dataset and determine category
@@ -99,23 +104,51 @@ function categorizeLife(data) {
     return category;
 };
 
+/* Categorizes data into three categories: life expectancy (years)
+   1) 70-75, 2) 75-80, 3) 80-85. */
+function categorizePollution(data) {
+
+    // Create categories (3): life expectancy
+    const polCateg = {bucket1Min: 0, bucket1Max: 10, bucket2Max: 15}
+    let category = [];
+
+    // Fetch data from dataset and determine category
+    for (let i = 0; i < data.length; i++) {
+
+        var airPol = data[i][3];
+
+        if (airPol >= polCateg.bucket1Min && airPol < polCateg.bucket1Max) {
+            category.push('LOW')
+        }
+        else if (airPol >= polCateg.bucket1Max && airPol < polCateg.bucket2Max) {
+            category.push('MEDIUM')
+        }
+        else {
+            category.push('HIGH')
+        }
+    };
+
+    return category;
+};
+
 /* Converts data to custom JSON object for datamaps */
-function convertToDictionary(dataset, categoryLife, countryList) {
+function convertToDictionary(dataset, category, countryList) {
     let data = [];
     let dataCountry = {};
 
     // Fetch data variables, put in JSON format and add to dataList
     for (let i = 0; i < dataset.length; i++) {
             data.push({
-                fillKey: categoryLife[i],
+                fillKey: category[i],
                 lifeExpect: dataset[i][0],
                 waterQuality: dataset[i][1],
-                selfHealth: dataset[i][2]
+                selfHealth: dataset[i][2],
+                airPolution: dataset[i][3]
             });
         }
 
     // Assign data value to country (ISO) in JSON format
-    for (let i = 0; i < categoryLife.length; i++) {
+    for (let i = 0; i < dataset.length; i++) {
         dataCountry[countryList[i]] = data[i]
     }
 
@@ -132,7 +165,6 @@ function loadMap(dataLife) {
             HIGH: '#de2d26',
             LOW: '#fee0d2',
             MEDIUM: '#fc9272',
-            // UNKNOWN: '#fff7bc',
             defaultFill: '#bdbdbd'
         },
         "legend": true,
@@ -178,6 +210,9 @@ function loadMap(dataLife) {
         }
     });
 
+    map.updateChloropleth( {
+
+    });
     /* Creates canvas to draw on: bar chart with x and y axis. */
     function makeBars(country, data) {
         dataset = (data.dataCountry[country]);
@@ -187,7 +222,7 @@ function loadMap(dataLife) {
 
         // Set domain for scales
         x.domain(dataDictBar.map(function(d) { return d.indicator; }));
-        y.domain([0, d3.max(dataDictBar, function(d) { return d.percentage; })]);
+        // y.domain([0, d3.max(dataDictBar, function(d) { return d.percentage; })]);
 
         console.log("domein")
 
@@ -195,13 +230,12 @@ function loadMap(dataLife) {
         var bars = svg.selectAll(".bar")
             .data(dataDictBar)
         bars.enter().append("rect")
-            .style("fill", "steelblue")
             .attr("class", "bar")
             .attr("x", function(d) { return x(d.indicator); })
             .attr("width", x.rangeBand())
             .transition().duration(1000)
             .attr("y", function(d) { return y(d.percentage); })
-            .attr("height", function(d) { return height - y(d.percentage); });
+            .attr("height", function(d) { return height - y(d.percentage); })
 
         bars
             .transition().duration(1000)
@@ -220,7 +254,7 @@ function loadMap(dataLife) {
     var countryName = d3.select("#chart")
                         .append("h3")
                         .attr("class", "countryName")
-                        .text("No country selected")
+                        .text("Netherlands")
 
     // Set the ranges
     let x = d3.scale.ordinal()
@@ -255,6 +289,28 @@ function loadMap(dataLife) {
     // Scale domain of the data
     x.domain(dataLabels);
     y.domain(dataPercentage);
+
+    var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) { return d.percentage + " %"});
+
+    svg.call(tip);
+
+
+    dataDefault = makeDictBar(dataLife.dataCountry["NLD"]);
+
+    var bars = svg.selectAll(".bar")
+        .data(dataDefault)
+    bars.enter().append("rect")
+        .style("fill", "steelblue")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.indicator); })
+        .attr("width", x.rangeBand())
+        .attr("y", function(d) { return y(d.percentage); })
+        .attr("height", function(d) { return height - y(d.percentage); })
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide);
 
     // create X axis
     svg.append("g")
