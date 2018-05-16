@@ -1,16 +1,37 @@
 /**
- * Name: Mercylyn Wiemer
+ * Name: Mercylyn Wiemer (10749306)
  * Course: Data Processing
- * Date: 11-05-2018
+ * Date: 18-05-2018
  *
+ * Linked-views: Better Life Index (Life expectancy, water quality and self-reported health)
+ * positioning SVG?
  *
  */
-body {
+/* body {
     font: 10px Arial;
     color: #43a2ca;
     text-align: center;
+} */
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
 
-svg {
-    position: center;
+/* #header {
+    background-color: #31a354;
+    color: #ffffff;
+    text-align: center;
+} */
+
+.jumbotron {
+    background-color: #31a354;
+    color: #ffffff;
+    text-align: center;
+}
+
+.col-sm-6 {
+    text-align: center;
 }
