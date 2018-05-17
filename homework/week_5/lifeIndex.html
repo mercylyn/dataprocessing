@@ -11,6 +11,8 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
     <link rel="stylesheet" href="lifeIndex.css">
@@ -26,11 +28,9 @@
     <script type="text/javascript" src="datamaps.world.min.js"></script>
 
     <!-- D3 tooltip-->
-    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script src="https://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 
     <script src="lifeIndex.js"></script>
-    <!-- Bootstrap CSS -->
-    <!-- Latest compiled and minified CSS -->
 
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -40,22 +40,39 @@
 </head>
 
     <body>
+
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">Data Processing</a>
+            </div>
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="https://mercylyn.github.io/dataprocessing/homework/week_5/story.html">Storytelling</a></li>
+              <li><a href="#">Source of datae</a></li>
+            </ul>
+          </div>
+        </nav>
+
         <div class = "jumbotron">
-            <h2>Life expectancy per country</h1>
-            <h3>Mercylyn Wiemer (10749306)</h2>
-            <a href="https://stats.oecd.org"> Source of data: OECD</a>
+            <h2>A better life in Europe?</h2>
+            <h4>Mercylyn Wiemer (10749306)</h4>
+            <a href="https://stats.oecd.org/viewhtml.aspx?datasetcode=BLI2016&lang=en#"> Source of data: OECD (Better Life Index 2016)</a>
         </div>
 
-        <div class="row">
-            <div class="col-sm-6" id="chart" style="background-color:lavender;"></div>
+        <div class="container-fluid text-center">
+            <div class="row content">
+                <div class="row">
+                    <div class="col-sm-6" id="chart"></div>
 
-            <div class="col-sm-6" style="background-color:lavenderblush;">
-                <button type="button" class="btn btn-success">Life expectancy</button>
-                <button type="button" class="btn btn-danger">Air pollution</button>
-                <div id="datamap" style="position: relative; width: 500px; height:500px;"></div>
+                    <div class="col-sm-6">
+                        <button type="button" value="lifeExpect" class="btn btn-success">Life expectancy</button>
+                        <button type="button" value="airPolution" class="btn btn-danger">Air pollution</button>
+                        <div id="datamap"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- <script src="lifeIndex.js"></script> -->
 
     </body>
 </html>

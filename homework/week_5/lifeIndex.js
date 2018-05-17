@@ -11,12 +11,14 @@ window.onload = function() {
     loadData();
 };
 
+let dataLifeExpect, dataAirPollution;
+
 // Collecting data through API
 function loadData() {
     const lifeExpectancy = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HS_LEB.L.TOT/all?&dimensionAtObservation=allDimensions"
     const waterQuality = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.EQ_WATER.L.TOT/all?&dimensionAtObservation=allDimensions"
-    const selfHealth = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HS_SFRH.L.TOT/all?&dimensionAtObservation=allDimensions"
-    const airPol = "http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS+.EQ_AIRP.L.TOT/all?&dimensionAtObservation=allDimensions"
+    const selfHealth = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HS_SFRH.L.TOT/all?&dimensionAtObservation=allDimensions"
+    const airPol = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS+.EQ_AIRP.L.TOT/all?&dimensionAtObservation=allDimensions"
 
     // Requests queries: when fulfilled, continue
     d3.queue()
@@ -53,11 +55,14 @@ function loadData() {
         console.log(categoryPol);
 
         // Join dataset together
-        let data2016 = convertToDictionary(listData, categoryLife, countryList);
+        dataLifeExpect = convertToDictionary(listData, categoryLife, countryList);
 
-        console.log(data2016);
+        console.log(dataLifeExpect);
+        dataAirPollution = convertToDictionary(listData, categoryPol, countryList);
 
-        loadMap(data2016);
+        // console.log(data2016);
+
+        loadMap(dataLifeExpect);
 
     };
 };
@@ -158,30 +163,31 @@ function convertToDictionary(dataset, category, countryList) {
 
 /* Load map, create barchart: linked. */
 function loadMap(dataLife) {
-    var map = new Datamap({
+    let map = new Datamap({
         scope: 'world',
         element: document.getElementById('datamap'),
         fills: {
-            HIGH: '#de2d26',
-            LOW: '#fee0d2',
-            MEDIUM: '#fc9272',
+            HIGH: '#2b8cbe',
+            MEDIUM: '#7bccc4',
+            LOW: '#ccebc5',
             defaultFill: '#bdbdbd'
         },
-        "legend": true,
-        data: dataLife.dataCountry, //{}
+        data: {},
         done: function(datamap) {
             datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
-                if (dataLife.dataCountry[geography.properties.iso] == null) {
+                if (dataLifeExpect.dataCountry[geography.properties.iso] == null) {
                     console.log("Data is not available.");
                 }
                 else {
-                    makeBars(geography.properties.iso, dataLife);
+                    makeBars(geography.properties.iso, dataLifeExpect);
                     let updateName = d3.selectAll(".countryName")
                                         .text(geography.properties.name)
                 };
             });
         },
         geographyConfig: {
+            borderColor: "#252525",
+            borderWidth: 1,
             popupTemplate: function(geo, data) {
                 return ['<div class="hoverinfo"><strong>',
                         'Country: ' + geo.properties.name,
@@ -193,26 +199,47 @@ function loadMap(dataLife) {
                 if (!data.fillKey) {
                     return '#bdbdbd';
                 } else {
-                    return "orange";
+                    return "#fcbba1";
                 }
-            }
+            },
+            highlightBorderColor: "#252525",
+            highlightBorderWidth: 1,
         },
         setProjection: function(element) {
-            var projection = d3.geo.equirectangular()
+            let projection = d3.geo.equirectangular()
             .center([10, 40])
             .rotate([0, -15])
-            .scale(650)
+            .scale(550)
             .translate([element.offsetWidth / 2, element.offsetHeight / 2]);
-        var path = d3.geo.path()
+        let path = d3.geo.path()
             .projection(projection);
 
             return {path: path, projection: projection};
         }
     });
 
-    map.updateChloropleth( {
+    // Add legend
+    let legend_params = {
+        legendTitle: "Legend",
+        defaultFillName: "No data:",
+    };
 
-    });
+    map.legend(legend_params);
+
+    map.updateChoropleth(dataLifeExpect.dataCountry);
+
+    var button = d3.selectAll(".btn")
+                    .on("click", function() {
+                        let button = this.getAttribute("value");
+
+                        if (button == "lifeExpect") {
+                            map.updateChoropleth(dataLifeExpect.dataCountry)
+                        }
+                        else {
+                            map.updateChoropleth(dataAirPollution.dataCountry)
+                        }
+                    })
+
     /* Creates canvas to draw on: bar chart with x and y axis. */
     function makeBars(country, data) {
         dataset = (data.dataCountry[country]);
@@ -247,8 +274,8 @@ function loadMap(dataLife) {
 
     // Set dimensions of canvas
     const margin = {top: 100, bottom: 50, right:30, left: 60},
-        width = 500 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom,
+        width = 470 - margin.left - margin.right,
+        height = 470 - margin.top - margin.bottom,
         barHeight = 20;
 
     var countryName = d3.select("#chart")
@@ -323,24 +350,31 @@ function loadMap(dataLife) {
         .attr("class", "y axis")
         .call(yAxis)
 
-    // Y axis label left
+    // Y axis label
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", - barHeight * 2)
         .attr("x", 0 - (height - margin.right * 2))
         .style("font-size", "20px")
-        .text("Percentage of people satisfied");
+        .text("% of people reported good/satisfied");
 
+    // X axis label
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom)
+        .style("font-size", "17px")
+        .attr("text-anchor", "middle")
+        .text("Indicators");
 
     // Scatter plot title
     svg.append("text")
         .attr("class","title")
-        .attr("x", (width / 2) + margin.right)
-        .attr("y", 0 - (margin.left - margin.right))
+        .attr("x", (width / 2))
+        .attr("y", 0 - 50)
         .attr("text-anchor", "middle")
         .style("font-size", "20px")
         .style("text-decoration", "underline")
-        .text("Indicators per country");
+        .text("Better life index: indicator per country");
 }
 
 /* Return list of countries (ISO) */

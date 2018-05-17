@@ -20,10 +20,37 @@
     shape-rendering: crispEdges;
 }
 
+#chart {
+      padding-top: 20px;
+      background-color: #f1f1f1;
+      height: 100%;
+}
+
+#datamap {
+    width: 470px;
+    height:470px;
+    position: relative;
+}
+
+
+.row.content {
+    height: 450px;
+}
+
+/* On small screens, set height to 'auto' for sidenav and grid */
+@media screen and (max-width: 767px) {
+  #chart {
+    height: auto;
+    padding: 15px;
+  }
+  .row.content {height:auto;}
+}
+
 .jumbotron {
-    background-color: #31a354;
+    background-color: #6baed6;
     color: #ffffff;
     text-align: center;
+    width: 100%;
 }
 
 .col-sm-6 {
@@ -57,4 +84,8 @@
   margin: -1px 0 0 0;
   top: 100%;
   left: 0;
+}
+
+.datamaps-legend {
+    text-align: right;
 }
