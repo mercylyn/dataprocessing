@@ -4,17 +4,21 @@
  * Date: 18-05-2018
  *
  * Linked-views: Better Life Index (Life expectancy, water quality and self-reported health)
+ * Datasets containt the life expectancy, air poluttion, life expectancy and self-reported health
+ * are obtained from the OECD.
+ * The life expectancy and air pollution per country can be observed in a datamaps
+ * from Europe.
+ * When selecting a country from the datamap: the water quality and self-reported
+ * are visualized in a barchart.
  */
 
-/* Run code when files are loaded. */
-window.onload = function() {
-    loadData();
-};
-
+// global variables for datamap
 let dataLifeExpect, dataAirPollution;
 
-// Collecting data through API
-function loadData() {
+// Run code when files are loaded.
+window.onload = function() {
+
+    // Collecting data through API
     const lifeExpectancy = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HS_LEB.L.TOT/all?&dimensionAtObservation=allDimensions"
     const waterQuality = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.EQ_WATER.L.TOT/all?&dimensionAtObservation=allDimensions"
     const selfHealth = "https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUT+BEL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ITA+LVA+LUX+NLD+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+NMEC+RUS.HS_SFRH.L.TOT/all?&dimensionAtObservation=allDimensions"
@@ -38,62 +42,65 @@ function loadData() {
             dataAir = JSON.parse(response[3].responseText).dataSets[0].observations,
             dataCountry = JSON.parse(response[0].responseText).structure.dimensions.observation[0].values;
 
-            console.log(dataAir);
-        // Get length of data
-        let dataLength = Object.keys(dataLife).length;
-
         // List of countries: data
         let countryList = getCountry(dataCountry);
 
-        let listData = getData(dataLife, dataWater, dataHealth, dataAir, dataLength);
+        // Get data from JSON object and format to list
+        let listData = getData(dataLife, dataWater, dataHealth, dataAir);
 
-        console.log(listData)
+        // Categorize data life expectancy for datamap
         let categoryLife = categorizeLife(listData);
-        console.log(categoryLife);
 
+        // Categorize data air pollution for datamap
         let categoryPol = categorizePollution(listData);
-        console.log(categoryPol);
 
-        // Join dataset together
+        // Join dataset together in dictionary: life expectancy / air pollution
         dataLifeExpect = convertToDictionary(listData, categoryLife, countryList);
-
-        console.log(dataLifeExpect);
         dataAirPollution = convertToDictionary(listData, categoryPol, countryList);
 
-        // console.log(data2016);
-
-        loadMap(dataLifeExpect);
-
+        createLinkedView(dataLifeExpect);
     };
 };
 
-/* Converts data from JSON to an array containing three variables. */
-function getData(dataset1, dataset2, dataset3, dataset4, dataLength) {
+/* Return list of countries (ISO) */
+function getCountry(data) {
+    countryList = [];
+
+    // Get country iso from dataset
+    for (let i = 0; i < data.length; i++) {
+        countryList.push(data[i].id);
+    };
+
+    return countryList;
+};
+
+/* Converts data from JSON to an array containing four variables. */
+function getData(dataset1, dataset2, dataset3, dataset4) {
     let data = [];
 
     // Add data variables to array
-    for (let i = 0; i < dataLength; i++) {
+    for (let i = 0; i < Object.keys(dataset1).length; i++) {
         for (let j = 0; j < 1; j++) {
-            var key = i + ":0:0:" + j;
+            let key = i + ":0:0:" + j;
             data.push([dataset1[key][0], dataset2[key][0], dataset3[key][0], dataset4[key][0]]);
-        }
-    }
+        };
+    };
 
     return data;
-}
+};
 
 /* Categorizes data into three categories: life expectancy (years)
-   1) 70-75, 2) 75-80, 3) 80-85. */
+   1) 70-75, 2) 75-80, 3) >80 years. */
 function categorizeLife(data) {
 
     // Create categories (3): life expectancy
-    const lifeCat = {bucket1Min: 70, bucket1Max: 75, bucket2Max: 80}
+    const lifeCat = {bucket1Min: 70, bucket1Max: 75, bucket2Max: 80};
     let category = [];
 
     // Fetch data from dataset and determine category
     for (let i = 0; i < data.length; i++) {
 
-        var lifeExpect = data[i][0];
+        let lifeExpect = data[i][0];
 
         if (lifeExpect >= lifeCat.bucket1Min && lifeExpect < lifeCat.bucket1Max) {
             category.push('LOW')
@@ -109,18 +116,18 @@ function categorizeLife(data) {
     return category;
 };
 
-/* Categorizes data into three categories: life expectancy (years)
-   1) 70-75, 2) 75-80, 3) 80-85. */
+/* Categorizes data into three categories: air pollution (mg per cubic metre)
+   1) 0-10, 2) 10-15, 3) >15. */
 function categorizePollution(data) {
 
     // Create categories (3): life expectancy
-    const polCateg = {bucket1Min: 0, bucket1Max: 10, bucket2Max: 15}
+    const polCateg = {bucket1Min: 0, bucket1Max: 10, bucket2Max: 15};
     let category = [];
 
     // Fetch data from dataset and determine category
     for (let i = 0; i < data.length; i++) {
 
-        var airPol = data[i][3];
+        let airPol = data[i][3];
 
         if (airPol >= polCateg.bucket1Min && airPol < polCateg.bucket1Max) {
             category.push('LOW')
@@ -143,27 +150,136 @@ function convertToDictionary(dataset, category, countryList) {
 
     // Fetch data variables, put in JSON format and add to dataList
     for (let i = 0; i < dataset.length; i++) {
-            data.push({
-                fillKey: category[i],
-                lifeExpect: dataset[i][0],
-                waterQuality: dataset[i][1],
-                selfHealth: dataset[i][2],
-                airPolution: dataset[i][3]
-            });
-        }
+        data.push({
+            fillKey: category[i],
+            lifeExpect: dataset[i][0],
+            waterQuality: dataset[i][1],
+            selfHealth: dataset[i][2],
+            airPolution: dataset[i][3]
+        });
+    };
 
     // Assign data value to country (ISO) in JSON format
     for (let i = 0; i < dataset.length; i++) {
         dataCountry[countryList[i]] = data[i]
-    }
+    };
 
     return {dataCountry};
 };
 
-
 /* Load map, create barchart: linked. */
-function loadMap(dataLife) {
+function createLinkedView(dataLife) {
+
+    // Set dimensions of canvas
+    const margin = {top: 100, bottom: 50, right:30, left: 60},
+        width = 470 - margin.left - margin.right,
+        height = 470 - margin.top - margin.bottom,
+        barHeight = 20,
+        originChart = 0;
+
+    let countryName = d3.select("#chart")
+                        .append("h3")
+                        .attr("class", "countryName")
+                        .text("Netherlands")
+
+    // Set the ranges
+    let x = d3.scale.ordinal()
+        .rangeRoundBands([0, width], .4),
+
+        y = d3.scale.linear()
+        .range([height, 0]);
+
+    // Define X axis
+    let xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom"),
+
+        // Define Y axis
+        yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+    // Create SVG element
+
+    let svg = d3.select("#chart")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .   attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+    dataLabels = ["Water Quality", "Self-reported Health"]
+    dataPercentage = [0, 100];
+
+    // Scale domain of the data
+    x.domain(dataLabels);
+    y.domain(dataPercentage);
+
+    // Setup the tool tip.
+    let tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) { return d.percentage + " %"});
+
+    svg.call(tip);
+
+    dataDefault = makeDictBar(dataLife.dataCountry["NLD"]);
+
+    // Fill barchart with default data (Netherlands)
+    let bars = svg.selectAll(".bar")
+        .data(dataDefault)
+    bars.enter().append("rect")
+        .style("fill", "steelblue")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.indicator); })
+        .attr("width", x.rangeBand())
+        .attr("y", function(d) { return y(d.percentage); })
+        .attr("height", function(d) { return height - y(d.percentage); })
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide);
+
+    // create X axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + (height) + ")")
+        .call(xAxis)
+
+    // create Y axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+
+    // Y axis label
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", originChart - barHeight * 2)
+        .attr("x", originChart - (height - margin.right * 2))
+        .style("font-size", "20px")
+        .text("% of people reported good/satisfied");
+
+    // X axis label
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom)
+        .style("font-size", "17px")
+        .attr("text-anchor", "middle")
+        .text("Indicators");
+
+    // Scatter plot title
+    svg.append("text")
+        .attr("class","title")
+        .attr("x", (width / 2))
+        .attr("y", originChart - margin.bottom)
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+        .style("text-decoration", "underline")
+        .text("Better life index: indicator per country");
+
+    // Keeps track of data selected by user
     let currentData = "lifeExpectancy";
+
+    // Create datamap (Zoom on Europe) and set configruation
     let map = new Datamap({
         scope: 'world',
         element: document.getElementById('datamap'),
@@ -180,7 +296,7 @@ function loadMap(dataLife) {
                     console.log("Data is not available.");
                 }
                 else {
-                    makeBars(geography.properties.iso, dataLifeExpect);
+                    updateBars(geography.properties.iso, dataLifeExpect);
                     let updateName = d3.selectAll(".countryName")
                                         .text(geography.properties.name)
                 };
@@ -227,17 +343,19 @@ function loadMap(dataLife) {
         }
     });
 
-    // Add legend
     let legend_params = {
         legendTitle: "legend",
         defaultFillName: "No data:",
     };
 
+    // Add legend to datamap
     map.legend(legend_params);
 
+    // Set data of map to default: life expectancy
     map.updateChoropleth(dataLifeExpect.dataCountry);
 
-    var button = d3.selectAll(".btn")
+    // Keep track of user input: switching between datasets
+    let button = d3.selectAll(".btn")
                     .on("click", function() {
                         let button = this.getAttribute("value");
 
@@ -252,20 +370,16 @@ function loadMap(dataLife) {
                     });
 
     /* Creates canvas to draw on: bar chart with x and y axis. */
-    function makeBars(country, data) {
-        dataset = (data.dataCountry[country]);
+    function updateBars(country, data) {
 
-        console.log(dataset)
-        dataDictBar = makeDictBar(dataset);
+        // Convert data to dictionary
+        dataDictBar = makeDictBar(data.dataCountry[country]);
 
-        // Set domain for scales
+        // Set domain for x scale
         x.domain(dataDictBar.map(function(d) { return d.indicator; }));
-        // y.domain([0, d3.max(dataDictBar, function(d) { return d.percentage; })]);
-
-        console.log("domein")
 
         // Create bars + update
-        var bars = svg.selectAll(".bar")
+        let bars = svg.selectAll(".bar")
             .data(dataDictBar)
         bars.enter().append("rect")
             .attr("class", "bar")
@@ -273,7 +387,7 @@ function loadMap(dataLife) {
             .attr("width", x.rangeBand())
             .transition().duration(1000)
             .attr("y", function(d) { return y(d.percentage); })
-            .attr("height", function(d) { return height - y(d.percentage); })
+            .attr("height", function(d) { return height - y(d.percentage); });
 
         bars
             .transition().duration(1000)
@@ -282,123 +396,7 @@ function loadMap(dataLife) {
 
         bars.exit().remove();
     };
-
-    // Set dimensions of canvas
-    const margin = {top: 100, bottom: 50, right:30, left: 60},
-        width = 470 - margin.left - margin.right,
-        height = 470 - margin.top - margin.bottom,
-        barHeight = 20;
-
-    var countryName = d3.select("#chart")
-                        .append("h3")
-                        .attr("class", "countryName")
-                        .text("Netherlands")
-
-    // Set the ranges
-    let x = d3.scale.ordinal()
-        .rangeRoundBands([0, width], .4),
-
-        y = d3.scale.linear()
-        .range([height, 0]);
-
-    // Define X axis
-    let xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom"),
-
-        // Define Y axis
-        yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left");
-
-    // Create SVG element
-    // let svg = d3.select("body")
-    var svg = d3.select("#chart")
-        .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .   attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
-
-    dataLabels = ["Water Quality", "Self-reported Health"]
-    dataPercentage = [0, 100];
-
-    // Scale domain of the data
-    x.domain(dataLabels);
-    y.domain(dataPercentage);
-
-    var tip = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([-10, 0])
-        .html(function(d) { return d.percentage + " %"});
-
-    svg.call(tip);
-
-
-    dataDefault = makeDictBar(dataLife.dataCountry["NLD"]);
-
-    var bars = svg.selectAll(".bar")
-        .data(dataDefault)
-    bars.enter().append("rect")
-        .style("fill", "steelblue")
-        .attr("class", "bar")
-        .attr("x", function(d) { return x(d.indicator); })
-        .attr("width", x.rangeBand())
-        .attr("y", function(d) { return y(d.percentage); })
-        .attr("height", function(d) { return height - y(d.percentage); })
-        .on('mouseover', tip.show)
-        .on('mouseout', tip.hide);
-
-    // create X axis
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + (height) + ")")
-        .call(xAxis)
-
-    // create Y axis
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-
-    // Y axis label
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", - barHeight * 2)
-        .attr("x", 0 - (height - margin.right * 2))
-        .style("font-size", "20px")
-        .text("% of people reported good/satisfied");
-
-    // X axis label
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom)
-        .style("font-size", "17px")
-        .attr("text-anchor", "middle")
-        .text("Indicators");
-
-    // Scatter plot title
-    svg.append("text")
-        .attr("class","title")
-        .attr("x", (width / 2))
-        .attr("y", 0 - 50)
-        .attr("text-anchor", "middle")
-        .style("font-size", "20px")
-        .style("text-decoration", "underline")
-        .text("Better life index: indicator per country");
-}
-
-/* Return list of countries (ISO) */
-function getCountry(data) {
-    countryList = [];
-
-    // Get country iso from dataset
-    for (let i = 0; i < data.length; i++) {
-        countryList.push(data[i].id);
-    }
-
-    return countryList;
-}
+};
 
 // Convert dataset to dictionary format: for creating the barchart. */
 function makeDictBar(data) {

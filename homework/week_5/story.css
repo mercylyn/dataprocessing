@@ -3,17 +3,16 @@
  * Course: Data Processing
  * Date: 18-05-2018
  *
- * Linked-views: Better Life Index (Life expectancy, water quality and self-reported health)
- * positioning SVG?
- *
+ * Linked-views: Better Life Index 2016 (Life expectancy, air pollution, water quality
+ * and self-reported health).
  */
 
 /* Set black background color, white text and some padding */
 footer {
-  background-color: #6baed6;
-  text-align: center;
-  color: white;
-  padding: 15px;
+    background-color: #6baed6;
+    text-align: center;
+    color: white;
+    padding: 15px;
 }
 
 /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
@@ -21,16 +20,18 @@ footer {
 
 /* Set gray background color and 100% height */
 .sidenav {
-  padding-top: 20px;
-  background-color: #f1f1f1;
-  height: 100%;
+    padding-top: 20px;
+    background-color: #f1f1f1;
+    height: 100%;
 }
 
 /* On small screens, set height to 'auto' for sidenav and grid */
 @media screen and (max-width: 767px) {
-  .sidenav {
-    height: auto;
-    padding: 15px;
-  }
-  .row.content {height:auto;}
+    .sidenav {
+        height: auto;
+        padding: 15px;
+    }
+    .row.content {
+        height: auto;
+    }
 }
