@@ -274,7 +274,7 @@ function createLinkedView(dataLife) {
         .attr("text-anchor", "middle")
         .style("font-size", "20px")
         .style("text-decoration", "underline")
-        .text("Better life index: indicator per country");
+        .text("Better life index: indicator per country 2016");
 
     // Keeps track of data selected by user
     let currentData = "lifeExpectancy";
