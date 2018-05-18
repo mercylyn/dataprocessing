@@ -163,6 +163,7 @@ function convertToDictionary(dataset, category, countryList) {
 
 /* Load map, create barchart: linked. */
 function loadMap(dataLife) {
+    let currentData = "lifeExpectancy";
     let map = new Datamap({
         scope: 'world',
         element: document.getElementById('datamap'),
@@ -189,10 +190,18 @@ function loadMap(dataLife) {
             borderColor: "#252525",
             borderWidth: 1,
             popupTemplate: function(geo, data) {
-                return ['<div class="hoverinfo"><strong>',
-                        'Country: ' + geo.properties.name,
-                        ', life expectancy: ' + data.lifeExpect + ' years',
-                        '</strong></div>'].join('');
+                if (currentData === "lifeExpectancy") {
+                    return ['<div class="hoverinfo"><strong>',
+                            'Country: ' + geo.properties.name,
+                            ', Life expectancy: ' + data.lifeExpect + ' years',
+                            '</strong></div>'].join('');
+                } else {
+                    return ['<div class="hoverinfo"><strong>',
+                            'Country: ' + geo.properties.name,
+                            '<br/>Air pollution: ' + data.airPolution +
+                            ' mg per cubic metre',
+                            '</strong></div>'].join('');
+                }
             },
             highlightFillColor: function(data) {
                 console.log(data);
@@ -220,7 +229,7 @@ function loadMap(dataLife) {
 
     // Add legend
     let legend_params = {
-        legendTitle: "Legend",
+        legendTitle: "legend",
         defaultFillName: "No data:",
     };
 
@@ -234,17 +243,19 @@ function loadMap(dataLife) {
 
                         if (button == "lifeExpect") {
                             map.updateChoropleth(dataLifeExpect.dataCountry)
+                            currentData = "lifeExpectancy";
                         }
                         else {
                             map.updateChoropleth(dataAirPollution.dataCountry)
+                            currentData = "airPolution";
                         }
-                    })
+                    });
 
     /* Creates canvas to draw on: bar chart with x and y axis. */
     function makeBars(country, data) {
         dataset = (data.dataCountry[country]);
 
-        console.log(country)
+        console.log(dataset)
         dataDictBar = makeDictBar(dataset);
 
         // Set domain for scales

@@ -7,11 +7,6 @@
  * positioning SVG?
  *
  */
-/* body {
-    font: 10px Arial;
-    color: #43a2ca;
-    text-align: center;
-} */
 
 .axis path,
 .axis line {
@@ -30,6 +25,7 @@
     width: 470px;
     height:470px;
     position: relative;
+    text-align: left;
 }
 
 
@@ -84,8 +80,4 @@
   margin: -1px 0 0 0;
   top: 100%;
   left: 0;
-}
-
-.datamaps-legend {
-    text-align: right;
 }
