@@ -3,7 +3,7 @@
  * Course: Data Processing
  * Date: 18-05-2018
  *
- * Linked-views: Better Life Index (Life expectancy, water quality and self-reported health)
+ * Linked-views: Better Life Index (Life expectancy, air pollution, water quality and self-reported health)
  * Datasets containt the life expectancy, air poluttion, life expectancy and self-reported health
  * are obtained from the OECD.
  * The life expectancy and air pollution per country can be observed in a datamaps
