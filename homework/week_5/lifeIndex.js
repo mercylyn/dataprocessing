@@ -320,7 +320,6 @@ function createLinkedView(dataLife) {
                 }
             },
             highlightFillColor: function(data) {
-                console.log(data);
                 if (!data.fillKey) {
                     return '#bdbdbd';
                 } else {
